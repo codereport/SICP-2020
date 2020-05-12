@@ -77,4 +77,9 @@
 
 ; Algorithms + Threading
 
-; TODO
+(require threading)
+; (require algorithms) ;; TODO
+
+(define (expt b n)
+  (~> (repeat-n n b) ; TODO 
+      (foldl * 1 _)))
