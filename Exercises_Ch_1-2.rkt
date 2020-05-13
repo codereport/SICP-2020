@@ -107,3 +107,25 @@
 (define (expt b n)
   (~> (repeat-n n b) ; TODO 
       (foldl * 1 _)))
+
+; Fast exponentiation
+
+; Recursive
+
+(define (square x) (* x x))
+
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((even? n) (square (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+; Exercise 1.16 (59/60)
+
+; Iterative
+
+(define (fast-expt b n)
+  (define (iter squares extra N)
+    (cond ((= N 1) (* squares extra))
+          ((even? N) (iter (square squares) extra (/ N 2)))
+          (else (iter squares (* extra squares) (- N 1)))))
+  (iter b 1 n))
