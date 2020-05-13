@@ -129,3 +129,47 @@
           ((even? N) (iter (square squares) extra (/ N 2)))
           (else (iter squares (* extra squares) (- N 1)))))
   (iter b 1 n))
+
+; Exercise 1.17
+
+; Recursive
+
+; there is a bug in this code I originally wrote
+(define (multiply a b)
+  (cond ((= a 1) b)
+        ((even? a) (multiply (/ a 2) (double b)))
+        (else (+ b (multiply (- a 1) b)))))
+
+; corrected code
+(define (multiply a b)
+  (cond ((= a 0) 0)
+        ((even? a) (multiply (/ a 2) (double b)))
+        (else (+ b (multiply (- a 1) b)))))
+
+; Exercise 1.18
+
+; this is totally broken
+(define (multiply a b)
+  (define (iter A B acc)
+    (cond ((= B 0) acc)
+          ((even? B) (iter A (/ B 2) (double A)))
+          (else (iter A (- B 1) (+ acc A)))))
+  (iter a b 0))
+
+; corrected code (after looking at http://community.schemewiki.org/?sicp-ex-1.18)
+(define (multiply a b)
+  (define (iter A B acc)
+    (cond ((= B 0) acc)
+          ((even? B) (iter (double A) (/ B 2) acc)) ; very interesting that acc isn't modified in this iteration
+          (else (iter A (- B 1) (+ acc A)))))
+  (iter a b 0))
+
+; GCD
+
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
+
+  
