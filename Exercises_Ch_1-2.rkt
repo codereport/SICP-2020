@@ -171,5 +171,32 @@
       a
       (gcd b (remainder a b))))
 
+; Exercise 1.22 (page 70/71)
 
+(define (smallest-divisor n)
+  (define (iter i)
+    (cond ((= (remainder n i) 0) i)
+          ((> (* i i) n) n)
+          (else (iter (+ i 1)))))
+  (iter 2))
+
+(define (prime? n)
+  (= (smallest-divisor n) n))
+
+(define (timed-prime-test n)
+  (start-prime-test n (current-milliseconds)))
+
+(define (start-prime-test n start-time)
+  (if (prime? n)
+      (report-prime (- (current-milliseconds) start-time) n)
+      (display "")))
+
+(define (report-prime elapsed-time n)
+  (display n)
+  (display " *** ")
+  (display elapsed-time)
+  (newline))
   
+; > (timed-prime-test 10000000000037)
+; 10000000000037 *** 116
+
