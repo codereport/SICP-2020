@@ -65,7 +65,12 @@
 
 (define (f-iter a b c count)
   (cond ((= 0 count) a)
-        (else (f-iter b c (+ c (* 2 b) (* 3 a)) (- count 1)))))
+        (else (f-iter b 
+                      c 
+                      (+ c 
+                         (* 2 b) 
+                         (* 3 a)) 
+                      (- count 1)))))
 
 ; > (map f (range 10))
 ; '(0 1 2 4 11 25 59 142 335 796)
