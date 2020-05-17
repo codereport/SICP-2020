@@ -1,7 +1,7 @@
-// https://play.rust-lang.org/?version=stable&mode=debug&edition=2018&gist=d98c05f42dc7e653a3513493d5ab8600
+// https://play.rust-lang.org/?version=stable&mode=debug&edition=2018&gist=dde1720a26e2530d29944c3427480518
 
 fn fact(n: i32) -> i32 {
-    return (1..n).fold(1, |acc, n| acc * n);
+    return (1..n+1).fold(1, |acc, n| acc * n);
 }
 
 fn main() {
