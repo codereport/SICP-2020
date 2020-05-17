@@ -18,6 +18,8 @@
 
 ; Algorithms + Threading
 
+(require threading)
+
 (define (fact n)
   (~> (range 1 (+ n 1))
       (foldl * 1 _)))
@@ -51,7 +53,7 @@
 ; Exercise 1.12
 
 (require threading)
-; (require algorithms) ;; TODO
+(require algorithms)
 
 (define (pascals-triangle n)
   (if (= 1 n)
@@ -65,7 +67,7 @@
 
 (define (pt-next-row row)
   (~> row
-      (sliding 2 1 _)
+      (sliding 2)
       (map (λ (x) (foldl + 0 x)) _)
       (append '(1) _ '(1))))
 
@@ -102,10 +104,10 @@
 ; Algorithms + Threading
 
 (require threading)
-; (require algorithms) ;; TODO
+(require algorithms)
 
 (define (expt b n)
-  (~> (repeat-n n b) ; TODO 
+  (~> (repeat n b)
       (foldl * 1 _)))
 
 ; Fast exponentiation
