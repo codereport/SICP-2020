@@ -4,3 +4,4 @@ This is the material (code and presentation slide decks) that correspond to the 
 
 - **Textbook:** [Structure and Iterpretation of Computer Programs](https://web.mit.edu/alexmv/6.037/sicp.pdf)
 - **Lectures:** [MIT Lectures](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-001-structure-and-interpretation-of-computer-programs-spring-2005/video-lectures/)
+- **Lectures:** [UC Berkeley Lectures](https://www.youtube.com/playlist?list=PLhMnuBfGeCDNgVzLPxF9o5UNKG1b-LFY9)
