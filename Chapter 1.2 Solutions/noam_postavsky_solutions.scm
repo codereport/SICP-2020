@@ -69,11 +69,16 @@
 (define (mult a b)
   (define (double x) (+ x x))
   (define (halve x) (/ x 2))
-  (cond
-   ((= b 0) 0)
-   ((= b 1) a)
-   ((even? b) (mult (double a) (halve b)))
-   (#t (mult (+ a b) (- b 1)))))
+  (define (iter a b acc)
+    (cond
+     ((= b 0) acc)
+     ;; ab + acc = (2a)(b/2) + acc
+     ((even? b) (iter (double a) (halve b) acc))
+     ;; ab + acc -> a (b - 1) + (acc + a)
+     ;;           = ab - a + acc + a
+     ;;           = ab + acc
+     (#t (iter a (- b 1) (+ acc a)))))
+  (iter a b 0))
 
 
 ;;; 1.27
