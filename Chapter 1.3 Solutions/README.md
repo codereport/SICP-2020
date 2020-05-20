@@ -1,4 +1,4 @@
-This folder contains solutions from members / attendees of the [Programming Language Virtual Meetup](https://www.meetup.com/Programming-Languages-Toronto-Meetup/) for Chapter 1 Part 3: Formulating Abstractions with Higher-Order Procedures ([link to specific meeting](https://www.meetup.com/Programming-Languages-Toronto-Meetup/events/270572369/)).
+This folder contains solutions from members / attendees of the [Programming Language Virtual Meetup](https://www.meetup.com/Programming-Languages-Toronto-Meetup/) for Chapter 1 Part 3: Formulating Abstractions with Higher-Order Procedures ([link to specific meeting](https://www.meetup.com/Programming-Languages-Toronto-Meetup/events/270736239/)).
 
 If you would like to submit your solution, simply:
 
