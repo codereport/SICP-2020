@@ -207,3 +207,16 @@ let pi = sum
 ;;  expected a procedure that can be applied to arguments
 ;;   given: 4.555532270803653
 ;;   arguments...: [none]
+
+;; Exercise 1.37 a) (page 94-96)
+
+; Note: this recursive solution on works when n and d ignore k :p
+(define (cont-frac n d k)
+  (if (= k 1)
+      (/ (n k) (d k))
+      (/ (n k) (+ (d k) (cont-frac n d (- k 1))))))
+
+;; > (/ 1 (cont-frac (λ (i) 1.0)
+;;                   (λ (i) 1.0)
+;;                   13))
+;; 1.6180257510729614
