@@ -285,3 +285,20 @@ let pi = sum
   
 ;; > (((double (double double)) inc) 5)
 ;; 21
+
+;; Exercise 1.42 (page 103)
+
+(define (compose f g)
+  (λ (x) (f (g x))))
+
+;; > ((compose (λ (x) (* x x))
+;;             (λ (x) (+ 1 x)))
+;;    6)
+;; 49
+
+;; Exercise 1.43 (page 104)
+
+(define (repeated f n)
+  (if (= n 0)
+      (λ (x) x)
+      (compose f (repeated f (- n 1)))))
