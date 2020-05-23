@@ -51,11 +51,12 @@ let pi = sum
 (define (cube x) (* x x x))
 
 (define (simpsons-integral f a b n)
-  (let ((h (/ (+ b a) n))
-        (coefficients (flatten
-                        (append '(1)
-                                (make-list (- (/ n 2) 1) '(4 2))
-                                '(4 1)))))
+  (let* ((h (/ (+ b a) n))
+         (k (- (/ n 2) 1))
+         (coefficients (flatten
+                         (append '(1)
+                                 (make-list k '(4 2))
+                                 '(4 1)))))
     (~>> (range a (+ b h) h)
          (map f)
          (zip-with * coefficients)
