@@ -14,8 +14,7 @@
 
 ;; Cleaned up
 
-(define (sum xs)  (foldl + 0 xs))
-(define (prod xs) (foldl * 1 xs))
+(require algorithms)
 
 (define (first-n-odds n)
   (~>> (range n)
@@ -23,7 +22,7 @@
 
 (~>> (first-n-odds 10000)
      (chunks-of _ 2)
-     (map prod)
+     (map product)
      (map (λ (x) (/ 8.0 x)))
      (sum))
 
