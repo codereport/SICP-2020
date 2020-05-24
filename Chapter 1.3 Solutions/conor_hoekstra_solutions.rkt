@@ -144,7 +144,7 @@ let pi = sum
       (newline)
       (display next)
       (if (close-enough? guess next)
-          (next)
+          next
           (try next))))
   (try first-guess))
 
@@ -163,10 +163,7 @@ let pi = sum
 ;; 1.6180555555555556
 ;; 1.6180257510729614
 ;; 1.6180371352785146
-;; 1.6180327868852458. . application: not a procedure;
-;;  expected a procedure that can be applied to arguments
-;;   given: 1.6180327868852458
-;;   arguments...: [none]
+;; 1.6180327868852458
 
 ;; > (fixed-point (λ (x) (/ (log 1000) (log x))) 2.0)
 
@@ -203,10 +200,7 @@ let pi = sum
 ;; 4.555547679306398
 ;; 4.555527808516254
 ;; 4.555540912917957
-;; 4.555532270803653. . application: not a procedure;
-;;  expected a procedure that can be applied to arguments
-;;   given: 4.555532270803653
-;;   arguments...: [none]
+;; 4.555532270803653
 
 ;; Exercise 1.37 a) (page 94-96)
 
