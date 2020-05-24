@@ -112,7 +112,7 @@ let pi = sum
 
 (f f)
 (f 2)
-(2 2) <- 2 is not a procedure
+(2 2) ; <- 2 is not a procedure
 
 ;; Exercise 1.35 (page 94)
 
