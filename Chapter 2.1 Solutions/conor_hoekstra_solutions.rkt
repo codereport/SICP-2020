@@ -138,3 +138,54 @@
 ;; 2.0000000000000004
 ;; > (rectangle-perimeter rr)
 ;; 5.656854249492381 ;; verify 4 * sqrt 2 = 5.65685424949
+
+;; Exercise 2.4 (page 125)
+
+(car (cons x y))
+(car (lambda (m) (x y)))
+(lambda (lambda (p q) p) (x y))
+(lambda (x y) x)
+(x) ;; :) 
+
+(define (car z)
+  (z (lambda (p q) q)))
+  
+;; Exercise 2.5 (page 125)
+
+(require algorithms) ;; repeat
+(require threading)
+
+(define (positive-pow base exp)
+  (~>> (repeat exp base)
+       (product)))
+
+(define (make-pair a b)
+  (* (positive-pow 2 a)
+     (positive-pow 3 b)))
+
+(define (factor-out n factor)
+  (define (iter N acc)
+    (if (< 0 (remainder N factor))
+        acc
+        (iter (/ N factor) (+ 1 acc))))
+  (iter n 0))
+        
+(define (pair-fst pair) (factor-out pair 2))
+(define (pair-snd pair) (factor-out pair 3))
+
+;; > (define p (make-pair 4 6))
+;; > (pair-fst p)
+;; 4
+;; > (pair-snd p)
+;; 6
+
+;; Exercise 2.6
+
+(define one (lambda (f) (lambda (x) (f x)))) 
+(define two (lambda (f) (lambda (x) (f (f x))))) 
+
+;; taken from http://community.schemewiki.org/?sicp-ex-2.6
+ (define (add a b) 
+   (lambda (f) 
+     (lambda (x) 
+       ((a f) ((b f) x))))) 
