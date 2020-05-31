@@ -152,7 +152,7 @@
   
 ;; Exercise 2.5 (page 125)
 
-(require algorithms) ;; repeat
+(require algorithms) ;; repeat, product
 (require threading)
 
 (define (positive-pow base exp)
