@@ -82,9 +82,9 @@
 (define (make-rectangle a b c d)
   (list a b c d))
 
-(define first-point first)
-(define (second-point rect) (first (rest rect)))
-(define (third-point rect) (first (rest (rest rect))))
+(define first-point first)                             ; car
+(define (second-point rect) (first (rest rect)))       ; cadr
+(define (third-point rect) (first (rest (rest rect)))) ; caddr
 
 (define (sq x) (* x x))
 
