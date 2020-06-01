@@ -1,0 +1,288 @@
+#+PROPERTY: header-args+ :results none
+#+PROPERTY: header-args+ :session *SICP-2.1-Scheme-session*
+#+PROPERTY: header-args+ :noweb no-export
+#+PROPERTY: header-args+ :tangle yes
+#+OPTIONS: num:nil
+
+#+TITLE: SICP Chapter 2, Section 1 solutions
+
+* SICP Chapter 2, Section 1
+
+We use =sqrt= and =fast-iter-expt= from the previous chapter's code.
+
+#+BEGIN_SRC scheme
+  (module (sicp chapter1)
+      (sqrt fast-iter-expt)
+    <<chapter1-code>>)
+#+END_SRC
+
+See [[*Appendix - Chapter 1 code][Appendix - Chapter 1 code]].
+
+** Exercise 2.1
+
+#+NAME: ex-2.1
+#+BEGIN_SRC scheme
+  ;;       (FUNCTOR-NAME             (ARG-MODULE1    (EXPORTS1...         )))
+  (functor (rational-numbers-functor (representation (make-rat numer denom)))
+      ;; Functor's exports.
+      (print-rat
+       add-rat sub-rat
+       mul-rat div-rat
+       equal-rat?
+       make-rat numer denom)
+      ;; Functor body.
+      (import representation
+              (only scheme ;; Only the following definitions from standard Scheme.
+                    define
+                    cons car cdr
+                    newline display
+                    remainder < > = / + - * abs))
+    (define (add-rat x y)
+      (make-rat (+ (* (numer x) (denom y))
+                   (* (numer y) (denom x)))
+                (* (denom x) (denom y))))
+
+    (define (sub-rat x y)
+      (make-rat (- (* (numer x) (denom y))
+                   (* (numer y) (denom x)))
+                (* (denom x) (denom y))))
+
+    (define (mul-rat x y)
+      (make-rat (* (numer x) (numer y))
+                (* (denom x) (denom y))))
+
+    (define (div-rat x y)
+      (make-rat (* (numer x) (denom y))
+                (* (denom x) (numer y))))
+
+    (define (equal-rat? x y)
+      (= (* (numer x) (denom y))
+         (* (numer y) (denom x))))
+
+    (define (print-rat x)
+      (display (numer x))
+      (display "/")
+      (display (denom x))
+      (newline)))
+
+  (module (rational as-reduced-pairs)
+      (make-rat numer denom)
+    (import (only scheme
+                  define if let cond
+                  cons car cdr
+                  remainder < > = / + - * abs
+                  and or not))
+    (define (numer x) (car x))
+    (define (denom x) (cdr x))
+    (define (gcd a b)
+      ;; NOTE: Standard Scheme's gcd always returns a non-negative
+      ;; number, but this one may return a negative answer if a or b are
+      ;; negative.
+      (if (= b 0)
+          a
+          (gcd b (remainder a b))))
+    (define (make-rat n d)
+      (let ((g (* (abs (gcd n d))
+                  (if (< d 0) -1 1))))
+        (cons (/ n g) (/ d g)))))
+
+  (module rational-numbers = (rational-numbers-functor (rational as-reduced-pairs)))
+#+END_SRC
+
+** Exercise 2.2
+
+#+BEGIN_SRC scheme
+(functor (segment-functor (point (make-point x-point y-point print-point)))
+    (make-segment start-segment end-segment midpoint-segment)
+  (import (only scheme
+                define if let cond
+                cons car cdr
+                remainder < > = / + - * abs
+                and or not)
+          point)
+  (define (make-segment start end)
+    (cons start end))
+  (define (start-segment seg) (car seg))
+  (define (end-segment seg) (cdr seg))
+  (define (midpoint-segment seg)
+    (define (average a b)
+      (/ (+ a b) 2))
+    (let ((s (start-segment seg))
+          (e (end-segment seg)))
+      (make-point (average (x-point s) (x-point e))
+                  (average (y-point s) (y-point e))))))
+
+(module (point-2d)
+    (make-point x-point y-point print-point)
+  (import (only scheme
+                define cons car cdr
+                newline display))
+  (define (make-point x y) (cons x y))
+  (define (x-point pt) (car pt))
+  (define (y-point pt) (cdr pt))
+  (define (print-point p)
+    (display "(")
+    (display (x-point p))
+    (display ",")
+    (display (y-point p))
+    (newline)))
+
+(module segment-2d = (segment-functor (point-2d)))
+#+END_SRC
+
+** Exercise 2.3
+
+#+BEGIN_SRC scheme
+(functor (rectangle-functor (rectangle-rep (make-rectangle rectangle-a rectangle-b rectangle-c rectangle-d)))
+    (perimeter-rectangle area-rectangle)
+    (import rectangle-rep point-2d
+            (rename (sicp chapter1) (sqrt √))
+            (only scheme
+                  define if let cond
+                  cons car cdr
+                  remainder < > = / + - * abs
+                  and or not))
+  (define (distance p1 p2)
+    (define (² x) (* x x))
+    (√ (+ (² (- (x-point p1) (x-point p2)))
+          (² (- (y-point p1) (y-point p2))))))
+  (define (width-rectangle rect)
+    (distance (rectangle-a rect) (rectangle-b rect)))
+  (define (length-rectangle rect)
+    (distance (rectangle-b rect) (rectangle-c rect)))
+  (define (perimeter-rectangle rect)
+    (* 2 (+ (width-rectangle rect)
+            (length-rectangle rect))))
+  (define (area-rectangle rect)
+    (* (width-rectangle rect)
+       (length-rectangle rect))))
+
+(module (rectangle repr 4point)
+    (make-rectangle rectangle-a rectangle-b rectangle-c rectangle-d)
+  (import (only scheme
+                define
+                cons car cdr))
+  (define (make-rectangle pt-a pt-b pt-c pt-d)
+    (cons pt-a (cons pt-b (cons pt-c pt-d))))
+  (define (rectangle-a r)
+    (car r))
+  (define (rectangle-b r)
+    (car (cdr r)))
+  (define (rectangle-c r)
+    (car (cdr (cdr r))))
+  (define (rectangle-d r)
+    (cdr (cdr (cdr r)))))
+
+(module rectangle-4point = (rectangle-functor (rectangle repr 4point)))
+#+END_SRC
+
+** Exercise 2.4
+
+#+BEGIN_SRC scheme
+
+(module (alternate-cons lambda projection) (cons car cdr)
+  (import (only scheme
+                define lambda))
+  (define (cons x y)
+    (lambda (m) (m x y)))
+  (define (car z)
+    (z (lambda (p q) p)))
+  ;; (car (cons X Y)) => (car (lambda (m) (m X Y)))
+  ;;                  => ((lambda (m) (m X Y)) (lambda (p q) p))
+  ;;                  => ((lambda (p q) p) X Y)
+  ;;                  => X
+  (define (cdr z)
+    (z (lambda (p q) q))))
+#+END_SRC
+
+** Exercise 2.5
+
+#+BEGIN_SRC scheme
+(module (alternate-cons integer product)
+    (cons car cdr)
+  (import (rename (sicp chapter1) (fast-iter-expt expt))
+          (only scheme
+                define let if cond
+                remainder < > = / + - * abs))
+  (define (log e n)
+    (define (iter e acc)
+      ;; 2ᵃ3ᵇ = e * n^acc
+      (if (= (remainder e n) 0)
+          (iter (/ e n) (+ acc 1)) ;; e * n^acc = e/n * n^(acc+1)
+          acc))
+    (iter e 0))
+  (define (cons a b)
+    (* (expt 2 a) (expt 3 b)))
+  (define (car z)
+    (log z 2))
+  (define (cdr z)
+    (log z 3)))
+#+END_SRC
+
+** Exercise 2.6
+
+#+BEGIN_SRC scheme
+(module (alternate-numbers church-numerals)
+    (zero add-1)
+  (import (only scheme define lambda)
+          (prefix scheme s:))
+  (define (to-scheme n)
+    ((n (lambda (x) (s:+ x 1))) 0))
+  (define zero
+    (lambda (f) (lambda (x) x)))
+  (define (add-1 n)
+    (lambda (f) (lambda (x) (f ((n f) x)))))
+  ;; (add-1 zero) => (add-1 (λ (f) (λ (x) x)))
+  ;;              => (λ (f) (λ (x) (f (((λ (f) (λ (x) x)) f) x))))
+  ;;              => λfx (f (((λ (f) id) f) x))
+  ;;              => λfx (f (id x))
+  ;;              => λfx (f x)
+  (define one
+    (lambda (f) (lambda (x) (f x))))
+  (define two
+    (lambda (f) (lambda (x) (f (f x)))))
+  (define (+ a b)
+    (lambda (f) (lambda (x)
+             ((b f) ((a f) x))))))
+#+END_SRC
+
+* Appendix - Chapter 1 code
+
+#+NAME: chapter1-code
+#+BEGIN_SRC scheme :eval no
+  (import (only scheme
+                define if cond let lambda
+                remainder even? < > = / + - * abs))
+  (define (fast-iter-expt b n)
+    (define (iter b n acc)
+      (cond
+       ((= n 0) acc)
+       ((even? n) (iter (* b b) (/ n 2) acc))
+       (else (iter b (- n 1) (* b acc)))))
+    (iter b n 1))
+
+  (define tolerance 0.00001)
+  (define (fixed-point f first-guess)
+    (define (close-enough? v1 v2)
+      (< (abs (- v1 v2)) tolerance))
+    (define (try guess)
+      (let ((next (f guess)))
+        (if (close-enough? guess next)
+            next
+            (try next))))
+    (try first-guess))
+
+  (define dx 0.00001)
+  (define (deriv g)
+    (lambda (x)
+      (/ (- (g (+ x dx)) (g x))
+         dx)))
+  (define (newtons-method g guess)
+    (define (newton-transform g)
+      (lambda (x)
+        (- x (/ (g x) ((deriv g) x)))))
+    (fixed-point (newton-transform g) guess))
+
+  (define (sqrt x)
+    (newtons-method (lambda (y) (- (* y y) x)) 1.0))
+#+END_SRC
