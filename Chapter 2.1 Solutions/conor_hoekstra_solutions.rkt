@@ -77,7 +77,7 @@
 ;; Exercise 2.3 (page 122)
 
 ;; Note: technically you can implement make-rectangle with only 3 points but
-;;       for the sake of simplicity I will use 4 (and assume counter-clockwise)
+;;       for the sake of simplicity I will use 4 (and assume clockwise)
 
 (define (make-rectangle a b c d)
   (list a b c d))
@@ -147,7 +147,7 @@
 (lambda (x y) x)
 (x) ;; :) 
 
-(define (car z)
+(define (cdr z)
   (z (lambda (p q) q)))
   
 ;; Exercise 2.5 (page 125)
