@@ -41,3 +41,37 @@
 ;; '(1 3 5)
 ;; > (same-parity 2 1 2 3 4 5)
 ;; '(2 4)
+
+;; Exercise 2.21
+
+(define (sq x) (* x x))
+
+(define (square-list items)
+  (if (null? items)
+      '()
+      (cons (sq (car items))
+            (square-list (cdr items)))))
+
+(define (square-list2 items)
+  (map sq items))
+
+;; Exercise 2.23
+
+;; this fails :(
+(define (for-each1 proc lst)
+  (if (null? lst)
+      (λ (x) (x))
+      ((proc (car lst))
+       (for-each proc (cdr lst)))))
+
+;; this prints a #t at the end :(
+(define (for-each2 proc lst)
+  (cond ((null? lst) #t)
+        (else (proc (car lst))
+              (for-each proc (cdr lst)))))
+
+;; this works
+(define (for-each proc lst)
+  (cond ((null? (cdr lst)) (proc (car lst)))
+        (else (proc (car lst))
+              (for-each proc (cdr lst)))))
