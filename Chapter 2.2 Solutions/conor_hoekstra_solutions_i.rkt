@@ -58,14 +58,14 @@
 ;; Exercise 2.23
 
 ;; this fails :(
-(define (for-each1 proc lst)
+(define (for-each proc lst)
   (if (null? lst)
       (λ (x) (x))
       ((proc (car lst))
        (for-each proc (cdr lst)))))
 
 ;; this prints a #t at the end :(
-(define (for-each2 proc lst)
+(define (for-each proc lst)
   (cond ((null? lst) #t)
         (else (proc (car lst))
               (for-each proc (cdr lst)))))
