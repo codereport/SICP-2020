@@ -125,3 +125,49 @@
                     (fringe x)
                     (list x))
                 (fringe (cdr tree))))))
+
+;; Example from book
+
+(define (scale-tree tree factor)
+  (cond ((null? tree) '())
+        ((not (pair? tree)) (* tree factor))
+        (else (cons (scale-tree (car tree) factor)
+                    (scale-tree (cdr tree) factor)))))
+
+;; Exercise 2.30 (direct)
+
+(define (square-tree tree)
+  (cond ((null? tree) '())
+        ((not (pair? tree)) (sq tree))
+        (else (cons (square-tree (car tree))
+                    (square-tree (cdr tree))))))
+
+;; Example from book
+
+(define (scale-tree tree factor)
+  (map (λ (sub-tree)
+         (if (pair? sub-tree)
+             (scale-tree sub-tree factor)
+             (* sub-tree factor)))
+       tree))
+
+;; Exercise 2.30 (map)
+
+(define (square-tree tree)
+  (map (λ (sub-tree)
+         (if (pair? sub-tree)
+             (square-tree sub-tree)
+             (sq sub-tree)))
+       tree))
+
+;; Exercise 2.31
+
+(define (tree-map tree proc)
+  (map (λ (sub-tree)
+         (if (pair? sub-tree)
+             (tree-map sub-tree proc)
+             (proc sub-tree)))
+       tree))
+
+(define (square-tree tree) (tree-map tree sq))
+(define (scale-tree tree factor) (tree-map tree (λ (x) (* x factor))))
