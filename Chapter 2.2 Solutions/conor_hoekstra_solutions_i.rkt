@@ -94,3 +94,34 @@
       cadadr
       cadadr)
 ;; 7
+
+;; Exercise 2.27
+
+(define (deep-reverse lst)
+  (define (iter lst acc)
+    (if (null? lst)
+        acc
+        (let ((fst (car lst)))
+          (iter (cdr lst)
+                (cons (if (list? fst)
+                          (reverse fst)
+                          fst)
+                      acc)))))
+  (iter lst '()))
+
+;; Exercise 2.28
+
+;; Solution 1
+
+(define fringe flatten) ; :p 
+
+;; Solution 2
+
+(define (fringe tree)
+  (if (null? tree)
+      '()
+      (let ((x (car tree)))
+        (append (if (list? x)
+                    (fringe x)
+                    (list x))
+                (fringe (cdr tree))))))
