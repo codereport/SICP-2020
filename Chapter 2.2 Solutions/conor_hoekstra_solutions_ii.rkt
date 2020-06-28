@@ -118,8 +118,9 @@
        (adjacent-map _ -)
        (andmap positive?)))
 
-(define (unique-pairs lst)
-  (~>> lst
-       (cartesian-product lst)
-       (filter increasing?)
-       (remove-duplicates)))
+(define (unique-pairs n)
+  (let ((lst (range 1 (+ n 1))))
+        (~>> lst
+             (cartesian-product lst)
+             (filter increasing?)
+             (remove-duplicates))))
