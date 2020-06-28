@@ -21,7 +21,7 @@
        (map square)
        (accumulate + 0)))
        
-;; Exercise 2.33
+;; Exercise 2.33 (page 161)
 
 (define (map p sequence)
   (accumulate (λ (x y) (cons (p x) y)) `() sequence))
@@ -109,14 +109,8 @@
 
 ;; Exercise 2.40 (169)
 
-(require algorithms) ; TODO add: increasing? sorted?
+(require algorithms)
 (require threading) 
-
-(define (increasing? lst)
-  (~>> lst
-       (reverse)
-       (adjacent-map _ -)
-       (andmap positive?)))
 
 (define (unique-pairs n)
   (let ((lst (range 1 (+ n 1))))
@@ -128,9 +122,34 @@
 ;; > (unique-pairs 4)
 ;; '((1 2) (1 3) (1 4) (2 3) (2 4) (3 4))
 
+;; Attempt #1 at increasing
+
+(define (increasing? lst)
+  (~>> lst
+       (reverse)
+       (adjacent-map _ -)
+       (andmap positive?)))
+
+;; Attempt #2 at increasing
+
+(define (increasing? lst)
+  (~>> lst
+       (adjacent-map _ <)
+       (andmap identity)))
+
+;; Attempt #3 at increasing
+
+(define (all? lst)
+  (andmap identity lst))
+
+(define (increasing? lst)
+  (~>> lst
+       (adjacent-map _ <)
+       (all?)))
+
 ;; Exercise 2.41
 
-(require algorithms) ; TODO add: increasing? sorted?
+(require algorithms)
 (require threading) 
 
 (define (triplets-sum-k n k)
