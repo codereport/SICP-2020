@@ -124,3 +124,21 @@
              (cartesian-product lst)
              (filter increasing?)
              (remove-duplicates))))
+
+;; > (unique-pairs 4)
+;; '((1 2) (1 3) (1 4) (2 3) (2 4) (3 4))
+
+;; Exercise 2.41
+
+(require algorithms) ; TODO add: increasing? sorted?
+(require threading) 
+
+(define (triplets-sum-k n k)
+  (let ((lst (range 1 (+ n 1))))
+        (~>> lst
+             (cartesian-product lst lst)
+             (filter increasing?)
+             (filter (λ (t) (= (sum t) k))))))
+
+;; > (triplets-sum-k 10 10)
+;; '((1 2 7) (1 3 6) (1 4 5) (2 3 5))
