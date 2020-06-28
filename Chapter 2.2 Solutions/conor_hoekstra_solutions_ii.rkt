@@ -142,3 +142,45 @@
 
 ;; > (triplets-sum-k 10 10)
 ;; '((1 2 7) (1 3 6) (1 4 5) (2 3 5))
+
+;; Code brom book for pict language
+
+(#%require sicp-pict)
+
+(define (corner-split painter n)
+  (if (= n 0)
+      painter
+      (let ((up (up-split painter (- n 1)))
+            (right (right-split painter (- n 1))))
+        (let ((top-left (beside up up))
+              (bottom-right (below right right))
+              (corner (corner-split painter (- n 1))))
+          (beside (below painter top-left)
+                  (below bottom-right corner))))))
+
+;; Exercise 2.44 (page 179)
+
+(define (up-split painter n)
+  (if (= n 0)
+      painter
+      (let ((smaller (up-split painter (- n 1))))
+        (below painter (beside smaller smaller)))))
+
+(define (right-split painter n) 
+  (if (= n 0) 
+      painter 
+      (let ((smaller (right-split painter (- n 1)))) 
+        (beside painter (below smaller smaller)))))
+
+;; Exercise 2.45 (page 182)
+
+(define (split f g)
+  (define (rec painter n)
+    (if (= n 0) 
+        painter 
+        (let ((smaller (rec painter (- n 1)))) 
+          (f painter (g smaller smaller)))))
+  rec)
+
+(define right-split (split beside below))
+(define up-split (split below beside))
