@@ -98,3 +98,28 @@
 ;; '(3 (2 (1 ())))
 
 ;; asssociativity / commutative
+
+;; Exercise 2.39 (page 166)
+
+(define (reverser sequence)
+  (foldr (λ (x y) (append (list x) y)) '() sequence))
+
+(define (reversel sequence)
+  (foldl (λ (x y) (cons x y)) '() sequence))
+
+;; Exercise 2.40 (169)
+
+(require algorithms) ; TODO add: increasing? sorted?
+(require threading) 
+
+(define (increasing? lst)
+  (~>> lst
+       (reverse)
+       (adjacent-map _ -)
+       (andmap positive?)))
+
+(define (unique-pairs lst)
+  (~>> lst
+       (cartesian-product lst)
+       (filter increasing?)
+       (remove-duplicates)))
