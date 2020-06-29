@@ -174,3 +174,169 @@
           (append rest (map (lambda (subset)
                               (cons (car s) subset))
                             rest))))))
+
+;;;;;;;;;;;;;;;;;;
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+
+(define nil (list))
+
+;; - 2.33
+
+(define (map p sequence)
+  (accumulate (lambda (x y) (cons (p x) y)) nil sequence))
+
+(define (append seq1 seq2)
+  (accumulate cons seq2 seq1))
+
+(define (length sequence)
+  (accumulate (lambda (x y) (+ 1 y)) 0 sequence))
+
+;; - 2.34
+
+(define (horner-eval x coefficient-sequence)
+  (accumulate (lambda (this-coeff higher-terms)
+                (+ this-coeff (* x higher-terms)))
+              0
+              coefficient-sequence))
+
+(horner-eval 2 (list 1 3 0 5 0 1)) ;=> 79
+
+;; - 2.36
+
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      nil
+      (cons (accumulate op init (map car seqs))
+            (accumulate-n op init (map cdr seqs)))))
+
+(accumulate-n + 0 '((1 2 3) (4 5 6) (7 8 9) (10 11 12))) ;=> (22 26 30)
+
+;; - 2.37
+
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+(define (matrix-*-vector m v)
+  (map (lambda (mᵢ)
+         (dot-product mᵢ v))
+       m))
+
+(define (transpose mat)
+  (accumulate-n cons (list) mat))
+
+(transpose '((1 2 3 4)
+             (4 5 6 6)
+             (6 7 8 9)))
+;; =>
+;; ((1 4 6)
+;;  (2 5 7)
+;;  (3 6 8)
+;;  (4 6 9))
+
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (lambda (mᵢ) (matrix-*-vector cols mᵢ)) m)))
+
+;; - 2.38
+
+(foldr / 1 (list 1 2 3)) ;=> 3/2
+
+(foldl / 1 (list 1 2 3)) ;=> 1/6
+
+(foldr list nil (list 1 2 3)) ;=> (1 (2 (3 ())))
+
+(foldl list nil (list 1 2 3)) ;=> (((() 1) 2) 3)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; To get the same result for foldr and fold, op should be
+;; commutative: ∀x,y (op x y) == (op y x)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; - 2.40
+
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low (enumerate-interval (+ low 1) high))))
+
+(define (filter predicate sequence)
+  (cond ((null? sequence) nil)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else (filter predicate (cdr sequence)))))
+
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+
+(define (prime? n)
+  (define (square x)
+    (* x x))
+  (define (find-divisor n test-divisor)
+    (cond ((> (square test-divisor) n) n)
+          ((divides? test-divisor n) test-divisor)
+          (else (find-divisor n (+ test-divisor 1)))))
+  (define (divides? a b)
+    (= (remainder b a) 0))
+  (define (smallest-divisor n)
+    (find-divisor n 2))
+
+  (= n (smallest-divisor n)))
+
+(define (prime-sum? pair)
+  (prime? (+ (car pair) (cadr pair))))
+
+(define (make-pair-sum pair)
+  (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
+
+(define (unique-pairs n)
+  (flatmap (lambda (i)
+             (map (lambda (j) (list i j))
+                  (enumerate-interval 1 (- i 1))))
+           (enumerate-interval 2 n)))
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum? (unique-pairs n))))
+
+(prime-sum-pairs 6)
+;=> ((2 1 3) (3 2 5) (4 1 5) (4 3 7) (5 2 7) (6 1 7) (6 5 11))
+
+;; - 2.41
+
+(define (unique-triples n)
+  (flatmap (lambda (i)
+             (map (lambda (jk)
+                    (cons i jk))
+                  (unique-pairs (- i 1))))
+           (enumerate-interval 3 n)))
+
+(define (triples-with-sum n s)
+  (filter (lambda (ijk)
+            (= (+ (car ijk) (cadr ijk) (caddr ijk)) s))
+          (unique-triples n)))
+
+(triples-with-sum 5 8) ;=> ((4 3 1) (5 2 1))
+
+;; - 2.44
+
+;; ?
+(define (up-split painter n)
+  (if (= n 0)
+      painter
+      (let ((smaller (up-split painter (- n 1))))
+        (below painter (beside smaller smaller)))))
+
+;; - 2.45
+
+(define (split smaller-split bigger-split)
+  (lambda (painter n)
+    (if (= n 0)
+        painter
+        (let ((smaller (up-split painter (- n 1))))
+          (bigger-splot painter (smaller-split smaller smaller))))))
