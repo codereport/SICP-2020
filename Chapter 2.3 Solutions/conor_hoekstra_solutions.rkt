@@ -104,3 +104,21 @@
 
 (check-equal? (union-set '(1 2 3) '(4 5 6)) '(6 5 4 1 2 3))
 (check-equal? (union-set '(1 2 3) '(2 3 4)) '(4 1 2 3 ))
+
+;; Exercise 2.62 (page 210)
+
+(define (union-set a b)
+  (define (iter a b c)
+    (cond ((null? a) (append (reverse b) c))
+          ((null? b) (append (reverse a) c))
+          ((= (car a) (car b)) (iter (cdr a) (cdr b) (cons (car a) c)))
+          ((< (car a) (car b)) (iter (cdr a)    b    (cons (car a) c)))
+          ((> (car a) (car b)) (iter    a    (cdr b) (cons (car b) c)))))          
+  (reverse (iter a b '())))   
+  
+(check-equal? (union-set '(1 2 3) '(4 5 6)) '(1 2 3 4 5 6))
+(check-equal? (union-set '(4 5 6) '(1 2 3)) '(1 2 3 4 5 6))
+(check-equal? (union-set '(1 2 3) '(2 3 4)) '(1 2 3 4))
+(check-equal? (union-set '(1 2 3) '(3 4)) '(1 2 3 4))
+(check-equal? (union-set '(1 3) '(2 3 4)) '(1 2 3 4))
+
