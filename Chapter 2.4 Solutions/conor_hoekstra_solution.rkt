@@ -128,7 +128,7 @@
 
 (define (findf proc lst)
   (let ((temp (memf proc lst)))
-  (if temp (car temp) #f)))
+    (if temp (car temp) #f)))
 
 (define (car=? x lst) (equal? x (car lst)))
 
