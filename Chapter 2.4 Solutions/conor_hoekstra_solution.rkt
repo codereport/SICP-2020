@@ -109,8 +109,6 @@
 (define (operator exp) (car exp))
 (define (operands exp) exp) ;; note this change
 
-(define (attach-tag type-tag contents) (cons type-tag contents))
-
 (check-equal? (deriv '(+ x 3) 'x) 1)
 (check-equal? (deriv '(* x 3) 'x) 3)
 (check-equal? (deriv '(^ x 3) 'x) '(* 3 (^ x 2)))
@@ -122,8 +120,6 @@
 (define table (make-hash))
 (define (put key1 key2 value) (hash-set! table (list key1 key2) value))
 (define (get key1 key2)       (hash-ref  table (list key1 key2) #f))
-
-(define (attach-tag type-tag contents) (cons type-tag contents))
 
 (define divA-record-set '(("Bob" (address "123 Lane")
                                  (salary  100000))
