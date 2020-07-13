@@ -121,16 +121,12 @@
 (define (put key1 key2 value) (hash-set! table (list key1 key2) value))
 (define (get key1 key2)       (hash-ref  table (list key1 key2) #f))
 
+;; Assume unique names for indexing
+
 (define divA-record-set '(("Bob" (address "123 Lane")
                                  (salary  100000))
                           ("Jen" (salary  150000)
                                  (adresss "456 Drive"))))
-
-(define (findf proc lst)
-  (let ((temp (memf proc lst)))
-    (if temp (car temp) #f)))
-
-(define (car=? x lst) (equal? x (car lst)))
 
 ;; name | address | salary
 (define divB-record-set '(("Jim" "789 Street" 200000)
@@ -138,13 +134,17 @@
 
 ;; a)
 
+(define (findf proc lst)
+  (let ((temp (memf proc lst)))
+    (if temp (car temp) #f)))
+
+(define (car=? x lst) (equal? x (car lst)))
+
 (define (get-recordA name) (findf (curry car=? name) divA-record-set))
 (define (get-recordB name) (findf (curry car=? name) divB-record-set))
 
 (put 'A 'record get-recordA)
 (put 'B 'record get-recordB)
-
-;; Assume unique names for indexing
 
 (define (get-record div name)
   ((get div 'record) name))
