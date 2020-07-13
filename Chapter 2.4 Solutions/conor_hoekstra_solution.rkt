@@ -117,3 +117,79 @@
 
 ;; d) Just swap key1 & key2 in your get proceduce implementation
 
+;; Exercise 2.74 (page 250-1)
+
+(define table (make-hash))
+(define (put key1 key2 value) (hash-set! table (list key1 key2) value))
+(define (get key1 key2)       (hash-ref  table (list key1 key2) #f))
+
+(define (attach-tag type-tag contents) (cons type-tag contents))
+
+(define divA-record-set '(("Bob" (address "123 Lane")
+                                 (salary  100000))
+                          ("Jen" (salary  150000)
+                                 (adresss "456 Drive"))))
+
+(define (findf proc lst)
+  (let ((temp (memf proc lst)))
+  (if temp (car temp) #f)))
+
+(define (car=? x lst) (equal? x (car lst)))
+
+;; name | address | salary
+(define divB-record-set '(("Jim" "789 Street" 200000)
+                          ("Ann" "000 Ave"    250000)))
+
+;; a)
+
+(define (get-recordA name) (findf (curry car=? name) divA-record-set))
+(define (get-recordB name) (findf (curry car=? name) divB-record-set))
+
+(put 'A 'record get-recordA)
+(put 'B 'record get-recordB)
+
+;; Assume unique names for indexing
+
+(define (get-record div name)
+  ((get div 'record) name))
+
+;; > (get-record 'A "Jen")
+;; '("Jen" (salary 150000) (adresss "456 Drive"))
+;; > (get-record 'B "Jim")
+;; '("Jim" "789 Street" 200000)
+
+;; b)
+
+(require threading)
+
+(put 'A 'salary (λ (name) (~>> (get-recordA name)
+                               (cdr)
+                               (findf (curry car=? 'salary))
+                               (cadr))))
+(put 'B 'salary (λ (name) (caddr (get-recordB name))))
+
+(define (get-salary div employee-name)
+  ((get div 'salary) employee-name))
+
+;; > (get-salary 'A "Jen")
+;; 150000
+;; > (get-salary 'B "Ann")
+;; 250000
+
+;; c)
+
+(define (find-employee-record name div-list)
+  (if (null? div-list)
+      "Failed to find employee"
+      (let* ((div (car div-list))
+             (temp (get-record div name)))
+        (if temp
+            temp
+            (find-employee-record name (cdr div-list))))))
+            
+;; > (find-employee-record "Jim" '(A B))
+;; '("Jim" "789 Street" 200000)
+;; > (find-employee-record "Jen" '(A B))
+;; '("Jen" (salary 150000) (adresss "456 Drive"))
+
+;; d) Add get-record, get-salary + corresponding put methods
