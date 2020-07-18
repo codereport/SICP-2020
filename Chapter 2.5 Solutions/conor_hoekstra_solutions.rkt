@@ -139,3 +139,24 @@
 
 (check-equal? (add 1 2) 3)
 (check-equal? (add (make-rational 1 2) (make-rational 1 4)) '(rational 3 . 4))
+
+;; Exercise 2.79 (261)
+
+(put 'equ? '(number number) =)                                           ; put in number package
+(put 'equ? '(rational rational) (λ (x y)                                 ; put in rational package
+                                  (= (* (numer x) (denom y))
+                                     (* (numer y) (denom x)))))    
+(put 'equ? '(complex complex) (λ (x y)                                   ; put in complex package
+                                (and (= (real-part x) (real-part y))
+                                     (= (imag-part x) (imag-part y)))))
+                                     
+(define (equ? x y) (apply-generic 'equ? x y))
+
+(check-equal? (equ? 1 1) #t)
+(check-equal? (equ? 1 2) #f)
+(check-equal? (equ? (make-rational 1 2) (make-rational 2 4)) #t)
+(check-equal? (equ? (make-rational 1 2) (make-rational 1 3)) #f)
+(check-equal? (equ? (make-complex-from-real-imag 1 2)
+                    (make-complex-from-real-imag 1 2)) #t)
+
+
