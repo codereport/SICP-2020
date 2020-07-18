@@ -159,4 +159,38 @@
 (check-equal? (equ? (make-complex-from-real-imag 1 2)
                     (make-complex-from-real-imag 1 2)) #t)
 
+;; Exercise 2.83 (page 272)
 
+(put 'raise 'integer  (λ (x) (make-rational x 1)))
+(put 'raise 'rational (λ (x) (make-real (/ (numer x) (denom x)))))
+(put 'raise 'real     (λ (x) (make-from-real-imag x 0)))
+
+(define (raise x) (apply-generic 'raise x)) 
+
+;; Exercise 2.84 (page 272)
+
+(define (do-raise a b)
+  (let ((a-type (type-tag a))
+        (b-type (type-tag b)))
+    (cond ((equal? a-type b-type) a)
+          ((get 'raise a-type)
+           (do-raise ((get 'raise a-type) (contents a)) b))
+          (else #f))))
+
+(define (apply-generic op . args)            
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+          (apply proc (map contents args))
+          (if (= (length args) 2)
+              (let ((a (car args))
+                    (b (cadr args)))
+                (cond ((do-raise a b) (apply-generic op (do-raise a b) b))
+                      ((do-raise b a) (apply-generic op a (do-raise b a)))
+                      (else (error "Not supported" (list op type-tags)))))
+              (error "Not supported" (list op type-tags)))))))
+
+(check-equal? (do-raise 2 3) 2)
+(check-equal? (do-raise 2 (make-rational 3 1)) (make-rational 2 1))
+(check-equal? (add 2 (make-rational 3 1)) (make-rational 5 1))
+(check-equal? (mul 2 (make-rational 3 1)) (make-rational 6 1))
