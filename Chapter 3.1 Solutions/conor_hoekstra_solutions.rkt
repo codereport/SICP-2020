@@ -121,7 +121,7 @@
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
 (check-equal? ((acc '456xyz 'withdraw) 40) "CALL THE COPS")
 
-;; Exercise 3.5
+;; Exercise 3.5 (page 309-11)
 
 (require threading)
 
@@ -149,3 +149,44 @@
 ;; 28.18404
 ;; "PI estimate"
 ;; 3.1414400000000002
+
+;; Exercise 3.7 (page 319-20)
+
+(define (make-account balance password)
+  (define (withdraw amount)
+    (if (>= balance amount)
+        (begin (set! balance (- balance amount)) balance)
+        "Insufficient funds"))
+  (define (deposit amount)
+    (set! balance (+ balance amount)) balance)
+  (define (make-joint joint-password)
+    (dispatch joint-password))
+  (define (dispatch account-password)
+    (λ (input-password m)
+      (cond ((not (eq? account-password input-password)) (λ (_) "Incorrect password"))
+            ((eq? m 'withdraw) withdraw)
+            ((eq? m 'deposit) deposit)
+            ((eq? m 'make-joint) make-joint)
+            (else (error "Unknown request: MAKE-ACCOUNT" m)))))
+  (dispatch password))
+  
+(define acc (make-account 100 '123abc))
+(check-equal? ((acc '123abc 'withdraw) 40) 60)
+(check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
+(check-equal? ((acc '123abc 'deposit)  10) 70)
+
+(define acc2 ((acc '123abc 'make-joint) 'canIjoin))
+(check-equal? ((acc2 'canIjoin 'withdraw) 70) 0)
+
+;; Exercise 3.8 (page 320)
+
+(define i 0)
+(define vals '(-0.5 0.5))
+
+(define (f x)
+  (set! i (+ i x))
+  (list-ref vals i))
+
+(check-equal? (+ (f 0) (f 1)) 0.0)
+(set! i 0)
+(check-equal? (+ (f 1) (f 0)) 1.0)
