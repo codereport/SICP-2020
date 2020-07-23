@@ -124,19 +124,22 @@
 ;; Exercise 3.5 (page 309-11)
 
 (require threading)
+(require algorithms) ;; add generate
+
+(define (generate n proc)
+  (for/list ((_ n)) (proc)))
 
 (define (random-in-range low high)
   (let ((range (- high low)))
     (+ low (* range (/ (random 10000) 10000.0)))))
 
 (define (estimate-interval P x1 x2 y1 y2 n)
-  (let ((rect-area (* (- x2 x1) (- y2 y1))))
-    (~>> (for/list ((_ n)) (P (random-in-range x1 x2)
-                              (random-in-range y1 y2)))
-         (map (λ (b) (if b 1 0)))
-         (foldl + 0)
-         (* rect-area)
-         (/ _ (* 1.0 n)))))
+  (let ((rect-area (* (- x2 x1) (- y2 y1)))
+        (random-point (λ () (list (random-in-range x1 x2) (random-in-range y1 y2)))))
+    (~>> (generate n random-point)
+         (map (λ (p) (if (apply P p) 1.0 0)))
+         (sum)
+         (* (/ rect-area n)))))
 
 (define (sq x) (* x x))
 (estimate-interval (λ (x y) (< (+ (sq (- x 5)) (sq (- y 7))) 9))
