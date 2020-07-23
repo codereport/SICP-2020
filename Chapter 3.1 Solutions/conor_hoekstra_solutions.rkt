@@ -82,7 +82,6 @@
   dispatch)  
   
 (define acc (make-account 100 '123abc))
-
 (check-equal? ((acc '123abc 'withdraw) 40) 60)
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
 (check-equal? ((acc '123abc 'deposit)  10) 70)
@@ -111,8 +110,7 @@
              (else (error "Unknown request: MAKE-ACCOUNT" m))))
   dispatch))
 
-  (define acc (make-account 100 '123abc))
-
+(define acc (make-account 100 '123abc))
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
