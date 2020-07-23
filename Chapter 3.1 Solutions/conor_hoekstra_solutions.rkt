@@ -120,3 +120,32 @@
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
 (check-equal? ((acc '456xyz 'withdraw) 40) "Incorrect password")
 (check-equal? ((acc '456xyz 'withdraw) 40) "CALL THE COPS")
+
+;; Exercise 3.5
+
+(require threading)
+
+(define (random-in-range low high)
+  (let ((range (- high low)))
+    (+ low (* range (/ (random 10000) 10000.0)))))
+
+(define (estimate-interval P x1 x2 y1 y2 n)
+  (let ((rect-area (* (- x2 x1) (- y2 y1))))
+    (~>> (for/list ((_ n)) (P (random-in-range x1 x2)
+                              (random-in-range y1 y2)))
+         (map (λ (b) (if b 1 0)))
+         (foldl + 0)
+         (* rect-area)
+         (/ _ (* 1.0 n)))))
+
+(define (sq x) (* x x))
+(estimate-interval (λ (x y) (< (+ (sq (- x 5)) (sq (- y 7))) 9))
+                   2 8 4 10 100000)
+
+(println "PI estimate")
+(/ (estimate-interval (λ (x y) (< (+ (sq (- x 5)) (sq (- y 7))) 9))
+                   2 8 4 10 100000) 9)
+
+;; 28.18404
+;; "PI estimate"
+;; 3.1414400000000002
