@@ -124,7 +124,7 @@
 ;; Exercise 3.5 (page 309-11)
 
 (require threading)
-(require algorithms) ;; generate, sum
+(require algorithms) ; generate, sum
 
 (define (random-in-range low high)
   (let ((range (- high low)))
