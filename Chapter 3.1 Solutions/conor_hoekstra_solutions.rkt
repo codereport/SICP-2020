@@ -124,10 +124,7 @@
 ;; Exercise 3.5 (page 309-11)
 
 (require threading)
-(require algorithms) ;; add generate
-
-(define (generate n proc)
-  (for/list ((_ n)) (proc)))
+(require algorithms) ;; generate, sum
 
 (define (random-in-range low high)
   (let ((range (- high low)))
