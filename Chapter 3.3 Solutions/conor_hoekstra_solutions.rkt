@@ -105,7 +105,7 @@
 
 (define (print-queue queue) (front-ptr queue))
 
-;; then just update insert adn delete
+;; then just update insert and delete
 
 (define (insert-queue! queue item)
   (let ((new-pair (cons item '())))
