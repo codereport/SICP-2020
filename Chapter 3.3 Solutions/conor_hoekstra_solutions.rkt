@@ -24,7 +24,7 @@
 (define z (cons y y))
 (count-pairs z) ; -> 7
 
-;; TODO box and pointer diagram
+;; for box and pointer diagrams, see conor_hoekstra_solutions.md
 
 ;; Exercise 3.17 (page 351)
 
