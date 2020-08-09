@@ -56,8 +56,6 @@
 (define c (cons b b))
 (check-equal? (count-pairs c) 3)
 
-;; TODO decide if we should do 3.18 / 3.19
-
 ;; from book (note use #sicp -- aka MIT Scheme -- for set-car!/set-cdr! ; Racket and Scheme don't have it)
 
 (define (front-ptr queue) (car queue))
@@ -124,9 +122,89 @@
         (else (set-front-ptr! queue (cdr (front-ptr queue)))
               (print-queue queue))))
 
-;; Exercise 3.23 
+;; Exercise 3.23 (this is an incorrect solution as I didn't use a doubly-linked list 
+;;                meaning that the big-O of pop-back-deque is O(n)
 
-;; TODO
+(define (front-ptr deque) (car deque))
+(define (rear-ptr deque)  (cdr deque))
+(define (set-front-ptr! deque item) (set-car! deque item))
+(define (set-rear-ptr!  deque item) (set-cdr! deque item))
+
+(define (make-deque) (cons '() '()))
+
+(define (empty-deque? deque) (null? (front-ptr deque)))
+
+(define (front-deque deque)
+  (if (empty-deque? deque)
+      (error "FRONT called with an empty deque" deque)
+      (car (front-ptr deque))))
+
+(define (back-deque deque)
+  (if (empty-deque? deque)
+      (error "BACK called with an empty deque" deque)
+      (car (rear-ptr deque))))
+
+(define (print-deque deque)
+  (if (empty-deque? deque)
+      "EMPTY"
+      (front-ptr deque)))
+
+(define (push-back-deque! deque item)
+  (let ((new-pair (cons item '())))
+    (cond ((empty-deque? deque)
+           (set-front-ptr! deque new-pair)
+           (set-rear-ptr! deque new-pair)
+           (print-deque deque))
+          (else
+           (set-cdr! (rear-ptr deque) new-pair)
+           (set-rear-ptr! deque new-pair)
+           (print-deque deque)))))
+
+(define (push-front-deque! deque item)
+  (let ((new-pair (cons item '())))
+    (cond ((empty-deque? deque)
+           (set-front-ptr! deque new-pair)
+           (set-rear-ptr! deque new-pair)
+           (print-deque deque))
+          (else
+           (set-cdr! new-pair (front-ptr deque))
+           (set-front-ptr! deque new-pair)
+           (print-deque deque)))))
+
+(define (pop-front-deque! deque)
+  (cond ((empty-deque? deque)
+         (error "POP-FRONT! called with an empty deque" deque))
+        (else (set-front-ptr! deque (cdr (front-ptr deque)))
+              (print-deque deque))))
+
+(define (get-second-last-pair lst)
+  (if (null? (cdr (cdr lst)))
+      lst
+      (get-second-last-pair (cdr lst))))
+
+(define (pop-back-deque! deque)
+  (cond ((empty-deque? deque)
+         (error "POP-BACK! called with an empty deque" deque))
+        ((= (length (front-ptr deque)) 1) (set! deque (cons '() '()))
+                                          (print-deque deque))
+        (else (set-rear-ptr! deque (get-second-last-pair (front-ptr deque)))
+              (set-cdr! (get-second-last-pair (front-ptr deque)) '())
+              (print-deque deque))))
+
+(define q (make-deque))
+(push-back-deque! q 'a)  ; (a)
+(push-back-deque! q 'b)  ; (a b)
+(push-back-deque! q 'c)  ; (a b c)
+(front-deque q)          ; 'a
+(back-deque q)           ; 'c
+(pop-front-deque! q)     ; (b c)
+(pop-front-deque! q)     ; (c)
+(push-front-deque! q 'a) ; (a c)
+(push-front-deque! q 'b) ; (b a c)
+(pop-back-deque! q)      ; (b a)
+(pop-back-deque! q)      ; (b)
+(pop-back-deque! q)      ; ()
+(push-back-deque! q 'a)  ; ((a) a) <- fails
 
 ;; Exercise 3.25
 
