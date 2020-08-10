@@ -22,7 +22,7 @@
 
 ; Exercise 3.17
 
-; Basically DFS
+; Hash to keep track of visited nodes
 
 (define visited-nodes '())
 
@@ -37,19 +37,20 @@
       (+ (count-pairs (car x))
          (count-pairs (cdr x))
          (visited? x))))
+
 ; Tests
-;(set! visited-nodes '()) ; need to reset each time?
-;(count-pairs '(a b c)) ; 3
+(set! visited-nodes '()) ; need to reset each time?
+(count-pairs '(a b c)) ; 3
 ;
-;(set! visited-nodes '())
-;(define 3rd (cons 'a '()))
-;(define 2nd (cons 3rd 3rd))
-;(define lst (cons 2nd '()))
-;(count-pairs lst) ; 3
+(set! visited-nodes '())
+(define 3rd (cons 'a '()))
+(define 2nd (cons 3rd 3rd))
+(define lst (cons 2nd '()))
+(count-pairs lst) ; 3
 ;
-;(set! visited-nodes '())
-;(define x (cons 2nd 2nd))
-;(count-pairs x) ;
+(set! visited-nodes '())
+(define x (cons 2nd 2nd))
+;(count-pairs x) ; S/O
 
 ; Exercise 3.21
 
@@ -108,18 +109,18 @@
 ; doubly linked list.
 ; the deque is a pair of two pointers (front rear)
 ; each is a pointer to first node of each side of the deque
-; a node is a pair of:
-; a value
-; a pair of next and prev ptrs
+; a node is pair(item, pair(next, prev))
 
 ; constructors and selectors
 
 (define (make-deque) (cons '() '()))
-(define (empty-deque? deque)(null? (front-ptr deque)))
-
-; front/back via helper procedure
 (define (front deque) (car deque))
 (define (rear deque) (cdr deque))
+(define (empty-deque? deque)
+  (or (null? (front deque)) (null? (rear deque))))
+
+; front/back via helper procedure
+
 (define (get-first-elem side deque)
   (if (empty-queue? deque)
       (error "Cannot retrieve from an empty deque")
@@ -132,20 +133,24 @@
 (define (set-front! deque node) (set-car! deque node)) 
 (define (set-rear! deque node) (set-cdr! deque node))
 
+; this isn't working based on the tests
 (define (insert-deque! side deque item)
   (let ((new-pair
          (cons item (cons '() '()))))
     (cond (empty-deque? deque)
           (set-front! deque new-pair)
           (set-rear! deque new-pair)
+          (print-deque deque)
           ((eq? side 'front)
            (set-car! (cdr new-pair) (front deque))
            (set-cdr! (cdr (front deque)) new-pair)
-           (set-front! deque new-pair))
+           (set-front! deque new-pair)
+           (print-deque deque))
           (else
            (set-cdr! (cdr new-pair) (rear deque))
            (set-car! (cdr (rear deque)) new-pair)
-           (set-rear! deque new-pair)))))
+           (set-rear! deque new-pair)
+           (print-deque deque)))))
 
 (define (front-insert-deque! deque item) (insert-deque! 'front deque item))
 (define (rear-insert-deque! deque item) (insert-deque! 'rear deque item))
@@ -158,7 +163,8 @@
          (set-front! deque (cadr (front deque)))
          (if (empty-deque? deque)
              (set-rear! deque '())
-             (set-cdr! (cdr (front deque)) '())))))
+             (set-cdr! (cdr (front deque)) '()))
+         (print-deque deque))))
 
 (define (rear-deque-delete! deque)
   (cond ((empty-deque? deque) (error "Deleting from empty deque" deque))
@@ -166,23 +172,27 @@
          (set-rear! deque (cddr (rear deque)))
          (if (empty-deque? deque)
              (set-front! deque '())
-             (set-car! (cdr (rear deque)) '())))))
+             (set-car! (cdr (rear deque)) '()))
+         (print-deque deque))))
 
-; print by traversing the next ptrs. 
+; print by traversing the next ptrs.
+
 (define (print-deque deque)
-  (define (iter acc dq)
-    (if (or (null? dq) (empty-deque? dq))
-        acc
-        (iter (append acc (list (caaar dq))) (cadr (front dq)))))
-  (iter '() dq))
+  (define (iter node)
+    (if (null? node)
+        (display "\n")
+        (begin
+          (display (car node))
+          (display " ")
+          (iter (cadr node)))))
+  (iter (front deque)))
 
-; Tests - IPR these don't fully work, probably printing is at fault
+; Tests - my solution doesn't actually work, not sure why
 
 ;(define dq (make-deque))
-
-;(front-insert-deque! dq 3)
+;(front-insert-deque! dq 3) ; --> (()) ????
 ;(print-deque dq) ; 3
-;(front-insert-deque! dq 2)
+;(front-insert-deque! dq 2) 
 ;(print-deque dq) ; 2 3
 
 ;(rear-insert-deque! dq 4)
@@ -197,4 +207,55 @@
 ;(rear-deque-delete! dq)
 ;(empty-deque? dq) ; #t
 
-; Exercise 3.25 - todo
+; Exercise 3.25
+
+; just replace a single key with a list of keys,
+; since equal? in assoc checks for list equality
+
+(define (assoc key records)
+  (cond ((null? records) false)
+        ((equal? key (caar records))
+         (car records))
+        (else (assoc key (cdr records)))))
+
+(define (make-table)
+  (let ((local-table (list '*table*)))
+    (define (lookup keys)
+      (let ((record
+             (assoc keys (cdr local-table))))
+        (if record
+            (cdr record)
+            #f)))
+    (define (insert! keys value)
+      (let ((record
+             (assoc keys (cdr local-table))))
+        (if record
+            (set-cdr! record value)
+            (set-cdr! local-table (cons (cons keys value)
+                                        (cdr local-table))))))
+    (define (dispatch m)
+      (cond ((eq? m 'get) lookup)
+            ((eq? m 'put!) insert!)
+            (else (error "Unknown operation: TABLE" m))))
+    dispatch))
+
+; Tests
+
+(define t (make-table))
+
+
+((t 'put!) (list 'colours 'red) 'R)
+((t 'put!) (list 'colours 'blue) 'B)
+((t 'get) (list 'colours 'blue)) ;; B
+((t 'put!) (list 'colours 'blue) 'BLUE)
+((t 'get) (list 'colours 'blue)) ;; BLUE
+
+; variadic
+
+((t 'put!) (list 'colours 'secondary 'green) 'G)
+((t 'put!) (list 'food 'italian 'carb 'pasta) 'Carbonara)
+
+((t 'get) (list 'colours 'secondary 'green)) ; G
+((t 'get) (list 'colours 'secondary 'blue)) ; #f
+
+((t 'get) (list 'food 'italian 'carb 'pasta)) ; Carbonara
