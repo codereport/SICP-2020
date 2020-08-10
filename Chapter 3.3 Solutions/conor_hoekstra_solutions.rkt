@@ -316,11 +316,6 @@ t ; (*table* (d . 4) (c . 3) (b . 2) (a . 1))
 
 ;; Exercise 3.25 (page 367)
 
-(define (assoc key records)
-  (cond ((null? records) false)
-        ((equal? key (caar records)) (car records))
-        (else (assoc key (cdr records)))))
-
 (define (lookup keys table)
   (let ((record (assoc keys (cdr table))))
     (if record
