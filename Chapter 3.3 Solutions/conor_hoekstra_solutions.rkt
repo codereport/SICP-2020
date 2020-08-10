@@ -122,8 +122,8 @@
         (else (set-front-ptr! queue (cdr (front-ptr queue)))
               (print-queue queue))))
 
-;; Exercise 3.23 (this is an incorrect solution as I didn't use a doubly-linked list 
-;;                meaning that the big-O of pop-back-deque is O(n)
+;; Exercise 3.23 (page 360) this is an incorrect solution as I didn't use a doubly-linked list 
+;;                          meaning that the big-O of pop-back-deque is O(n)
 
 (define (front-ptr deque) (car deque))
 (define (rear-ptr deque)  (cdr deque))
@@ -206,6 +206,140 @@
 (pop-back-deque! q)      ; ()
 (push-back-deque! q 'a)  ; ((a) a) <- fails
 
-;; Exercise 3.25
+;; 1D Table from book
 
-;; TODO
+(define (lookup key table)
+  (let ((record (assoc key (cdr table))))
+    (if record
+        (cdr record)
+        false)))
+
+(define (assoc key records)
+  (cond ((null? records) false)
+        ((equal? key (caar records)) (car records))
+        (else (assoc key (cdr records)))))
+
+(define (insert! key value table)
+  (let ((record (assoc key (cdr table))))
+    (if record
+        (set-cdr! record value)
+        (set-cdr! table
+                  (cons (cons key value)
+                        (cdr table)))))
+  'ok)
+(define (make-table)
+  (list '*table*))
+
+(define t (make-table))
+(insert! 'a 1 t) ; ok
+(insert! 'b 2 t) ; ok
+(insert! 'c 3 t) ; ok
+(insert! 'd 4 t) ; ok
+t ; (*table* (d . 4) (c . 3) (b . 2) (a . 1))
+
+;; 2D Table from book (non-message passing style)
+
+(define (lookup key-1 key-2 table)
+  (let ((subtable
+         (assoc key-1 (cdr table))))
+    (if subtable
+        (let ((record
+               (assoc key-2 (cdr subtable))))
+          (if record
+              (cdr record)
+              false))
+        false)))
+
+(define (insert! key-1 key-2 value table)
+  (let ((subtable (assoc key-1 (cdr table))))
+    (if subtable
+        (let ((record (assoc key-2 (cdr subtable))))
+          (if record
+              (set-cdr! record value)
+              (set-cdr! subtable
+                        (cons (cons key-2 value)
+                              (cdr subtable)))))
+        (set-cdr! table
+                  (cons (list key-1
+                              (cons key-2 value))
+                        (cdr table)))))
+  'ok)
+
+(define (make-table)
+  (list '*table*))
+
+(define t (make-table))
+(insert! 'a 'a 1 t) ; ok
+(insert! 'a 'b 2 t) ; ok
+(lookup  'a '1 t)   ; #f
+(lookup  'a 'a t)   ; 1
+
+;; 2D Table from book (message passing style)
+
+(define (make-table)
+  (let ((local-table (list '*table*)))
+    (define (lookup key-1 key-2)
+      (let ((subtable
+             (assoc key-1 (cdr local-table))))
+        (if subtable
+            (let ((record
+                   (assoc key-2 (cdr subtable))))
+              (if record (cdr record) false))
+            false)))
+    (define (insert! key-1 key-2 value)
+      (let ((subtable
+             (assoc key-1 (cdr local-table))))
+        (if subtable
+            (let ((record
+                   (assoc key-2 (cdr subtable))))
+              (if record
+                  (set-cdr! record value)
+                  (set-cdr! subtable
+                            (cons (cons key-2 value)
+                                  (cdr subtable)))))
+            (set-cdr! local-table
+                      (cons (list key-1 (cons key-2 value))
+                            (cdr local-table)))))
+      'ok)
+    (define (dispatch m)
+      (cond ((eq? m 'lookup-proc) lookup)
+            ((eq? m 'insert-proc!) insert!)
+            (else (error "Unknown operation: TABLE" m))))
+    dispatch))
+
+(define t (make-table))
+((t 'insert-proc!) 'a 'a 1) ; ok
+((t 'insert-proc!) 'a 'b 2) ; ok
+((t 'lookup-proc) 'a '1)    ; #f
+((t 'lookup-proc) 'a 'a)    ; 1
+
+;; Exercise 3.25 (page 367)
+
+(define (assoc key records)
+  (cond ((null? records) false)
+        ((equal? key (caar records)) (car records))
+        (else (assoc key (cdr records)))))
+
+(define (lookup keys table)
+  (let ((record (assoc keys (cdr table))))
+    (if record
+        (cdr record)
+        false)))
+
+(define (insert! keys value table)
+  (let ((record (assoc keys (cdr table))))
+    (if record
+        (set-cdr! record value)
+        (set-cdr! table
+                  (cons (cons keys value)
+                        (cdr table)))))
+  'ok)
+
+(define (make-table)
+  (list '*table*))
+
+(define t (make-table))
+(insert! '(a b c) 1 t) ; ok
+(insert! '(a b) 2 t)   ; ok
+(lookup  '(a 1) t)     ; #f
+(lookup  '(a b) t)     ; 2
