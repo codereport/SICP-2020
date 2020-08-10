@@ -204,7 +204,7 @@
 (pop-back-deque! q)      ; (b a)
 (pop-back-deque! q)      ; (b)
 (pop-back-deque! q)      ; ()
-(push-back-deque! q 'a)  ; ((a) a) <- fails
+(push-back-deque! q 'a)  ; (b a) <- fails
 
 ;; 1D Table from book
 
