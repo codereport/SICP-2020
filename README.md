@@ -1,6 +1,6 @@
 ## SICP-2020
 
-This is the material (code and presentation slide decks) that correspond to the [Programming Languages Virtual Meetup](https://www.meetup.com/Programming-Languages-Toronto-Meetup/) course that covered the following:
+This is the material (code and presentation slide decks) that correspond to the [Programming Languages Virtual Meetup](https://www.meetup.com/Programming-Languages-Toronto-Meetup/) course that covered the **Structure and Interpretation of Computer Programs** textbook.
 
 Read a short article by Brian Harvey on [Why SICP Matters?](https://people.eecs.berkeley.edu/~bh/sicp.html)
 
