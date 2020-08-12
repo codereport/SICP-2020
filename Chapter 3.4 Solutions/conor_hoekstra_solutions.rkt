@@ -13,14 +13,12 @@ b) worst case would be:
 
 ;; Exercise 3.39 (page 414)
 
-;; TODO come back to this one
-
-;; x 101: P 1 sets x to 100 and then P 2 increments x to 101.
-;; x 121: P 2 increments x to 11 and then P 1 sets x to x * x .
-;;   110: P 2 changes x from 10 to 11 between the two times that
-;;     P 1 accesses the value of x during the evaluation of (* x x) .
-;; x 11:  P 2 accesses x , then P 1 sets x to 100, then P 2 sets x .
-;;   100: P 1 accesses x (twice), then P 2 sets x to 11, then P 1 sets x .
+;; YES -> 101: P 1 sets x to 100 and then P 2 increments x to 101.
+;; YES -> 121: P 2 increments x to 11 and then P 1 sets x to x * x .
+;; NO  -> 110: P 2 changes x from 10 to 11 between the two times that
+;;             P 1 accesses the value of x during the evaluation of (* x x) .
+;; YES -> 11:  P 2 accesses x , then P 1 sets x to 100, then P 2 sets x . -> lambda could eval (* x x) and then +1 op could get 10 before set! take place
+;; NO  -> 100: P 1 accesses x (twice), then P 2 sets x to 11, then P 1 sets x .
 
 ;; Exercise 3.40 (page 414)
 
@@ -36,14 +34,63 @@ b) worst case would be:
 ;; They extra let expression will create an additional frame in the environment model 
 ;; - but other than that they are the same
 
-;; Exercise 3.47 (page 425)
+;; make-serializer / make-mutex from book
 
-;; TODO
+(define (make-serializer)
+  (let ((mutex (make-mutex)))
+    (lambda (p)
+      (define (serialized-p . args)
+        (mutex 'acquire)
+        (let ((val (apply p args)))
+          (mutex 'release)
+          val))
+      serialized-p)))
 
-;; Exercise 3.48 (page 426)
+(define (make-mutex)
+  (let ((cell (list false)))
+    (define (the-mutex m)
+      (cond ((eq? m 'acquire)
+             (if (test-and-set! cell)
+                 (the-mutex 'acquire))) ; retry
+            ((eq? m 'release) (clear! cell))))
+    the-mutex))
 
-;; TODO
+(define (clear! cell) (set-car! cell false))
 
-;; Exercise 3.49 (page 426)
+(define (test-and-set! cell)
+  (if (car cell)
+      true
+      (begin (set-car! cell true)
+             false)))
 
-;; TODO
+;; Exercise 3.47 a) (page 425)
+
+;; original (incorrect) solution
+
+(define (make-semaphore n)
+  (let ((count 0))
+    (define (the-semaphore msg)
+      (cond ((eq? msg 'acquire)
+             (if (>= count n)
+                 (the-semaphore 'acquire)
+                 (set! count (+ count 1))))
+            ((eq? msg 'release)
+             (set! (count (- count 1))))))
+    the-semaphore))
+    
+;; modified (correct) solution
+
+(define (make-semaphore n)
+  (let ((count 0)
+        (lock (make-mutex)))
+    (define (the-semaphore msg)
+      (cond ((eq? msg 'acquire)
+             (lock 'acquire)
+             (if (>= count n)
+                 (begin (lock 'release) (the-semaphore 'acquire))
+                 (begin (set! count (+ count 1) (lock 'release)))))
+            ((eq? msg 'release)
+             (lock 'aquire)
+             (set! (count (- count 1)))
+             (lock 'release))))
+    the-semaphore))
