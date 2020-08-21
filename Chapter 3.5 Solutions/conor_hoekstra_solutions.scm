@@ -170,4 +170,58 @@
 
 (stream-ref (accelerated-sequence
              euler-transform
-             pi-stream) 9)        ;3.141592653589795
+             pi-stream) 9)        ; 3.141592653589795
+
+;; Exercise 3.64
+
+;; Code from book
+
+(define (avg a b) (/ (+ a b) 2.0))
+
+(define (sqrt-improve guess x)
+  (avg guess (/ x guess)))
+
+(define (sqrt-stream x)
+  (define guesses
+    (cons-stream
+     1.0
+     (stream-map (lambda (guess) (sqrt-improve guess x))
+                 guesses)))
+  guesses)
+
+(define (sqrt x tolerance)
+  (stream-limit (sqrt-stream x) tolerance))
+
+;; Solution
+
+(define (stream-limit stream tolerance)
+  (let* ((prev   (stream-ref stream 0))
+         (result (stream-ref stream 1))
+         (delta (abs (- result prev))))
+  (if (< delta tolerance)
+      result
+      (stream-limit (stream-cdr stream) tolerance))))
+
+;; Test
+(sqrt 5 0.1)   ; 2.238095238095238
+(sqrt 5 0.001) ; 2.236067977499978
+
+;; Exercise 3.65 (page 459)
+
+;; ln(2) from alternating series
+
+(define (ln2-summands n)
+  (cons-stream (/ 1.0 n)
+               (stream-map - (ln2-summands (+ n 1)))))
+
+(define ln2-stream
+  (partial-sums (ln2-summands 1)))
+
+(stream-ref ln2-stream 1000)       ; 0.6936464315588232
+
+(stream-ref (euler-transform
+             ln2-stream) 1000)     ; 0.6931471806840143
+
+(stream-ref (accelerated-sequence
+             euler-transform
+             ln2-stream) 9)        ; 0.6931471805599454
