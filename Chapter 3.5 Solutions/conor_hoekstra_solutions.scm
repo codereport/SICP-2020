@@ -225,3 +225,109 @@
 (stream-ref (accelerated-sequence
              euler-transform
              ln2-stream) 9)        ; 0.6931471805599454
+
+;; Exercise 3.66 (page 462)
+
+;; code from the book
+
+(define (interleave s1 s2)
+  (if (stream-null? s1)
+      s2
+      (cons-stream (stream-car s1)
+                   (interleave s2 (stream-cdr s1)))))
+
+(define (pairs s t)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleave
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (pairs (stream-cdr s) (stream-cdr t)))))
+
+;; Initially didn't have any intuition - thought (1, 100) would be around n * (n + 1) / 2
+;; but played around and saw it was really closer to ~200
+
+(define ii (pairs integers integers))
+(stream-ref ii 197) ; (1 100)
+
+;; after this my guess was ~ 2 * sum(x, y) -> but after trying a couple examples
+;; it was clear that was going to be wrong
+
+;; probably more like x * y
+;; then i coded this procedure ... which was too inefficient
+
+(define (find-ref s p)
+  (define (iter n)
+    (if (equal? p (stream-ref s n))
+        n
+        (iter (+ n 1))))
+  (iter 0))
+
+;; then i thought this would be more efficient
+
+(define (find-ref s p)
+  (define (iter s-inner n)
+    (if (equal? p (stream-car s-inner))
+        n
+        (begin (display (stream-car s-inner))
+               (iter (stream-cdr s-inner) (+ n 1)))))
+  (iter s 0))
+
+;; (268581)(2 134292)(1 268582)(3 67148)(1 268583)(2 134293)
+;; (1 268584)(5 16791)(1 268585)(2 134294)(1 268586)(3 67149)
+;; (1 268587)(2 134295)(1 268588)(4 33577)(1 268589)(2 134296)
+;; (1 268590)(3 67150)(1 268591)(2 134297)(1 268592)(6 8399)
+;; (1 268593)(2 134298)(1 268594)(3 67151)(1 268595)(2 134299)(1 268596)
+
+;; this is from http://community.schemewiki.org/?sicp-ex-3.66
+
+;; (1,100):198;
+;; (100,100):2^100 - 1;
+;; ---------------
+;; f(n,m) m>=n (m,n is Z+)
+;; (m-n=0): 2^n - 1
+;; (m-n=1): (2^n - 1) + 2^(n - 1)
+;; (m-n>1): (2^n - 1) + 2^(n - 1) + (m - n - 1) * 2^n
+;; ------------------------------------
+;;   1   2   3   4   5   6   7   8   9  ...  100   
+;; 1 1   2   4   6   8  10  12  14  16       198 
+;; 2     3   5   9  13  17  21  25  29        
+;; 3         7  11  19  27  35  43  51
+;; 4            15  23  39  .....
+;; 5                31  .........
+;; .
+;; .
+;; 100 ------------------------------------- (2^100 - 1)
+
+;; Exercise 3.67 (page 462)
+
+;; orginal
+(define (pairs-orig s t)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleave
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (pairs-orig (stream-cdr s) (stream-cdr t)))))
+
+;; modified
+(define (pairs s t)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (interleave
+    (stream-map (lambda (x) (list (stream-car s) x))
+                (stream-cdr t))
+    (pairs (stream-cdr s) t))))
+
+;; Test
+(map (lambda (x) (stream-ref ii x)) '(0 1 2 3 4 5))
+;; ((1 1) (1 2) (2 1) (1 3) (2 2) (1 4))
+
+;; Exercise 3.70
+
+;; TODO
+
+;; Exercise 3.71
+
+;; TODO
+;; A this click to recording: https://www.youtube.com/watch?v=Qi4SDDjgHdU
