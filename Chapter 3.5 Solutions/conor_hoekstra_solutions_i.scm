@@ -323,11 +323,59 @@
 (map (lambda (x) (stream-ref ii x)) '(0 1 2 3 4 5))
 ;; ((1 1) (1 2) (2 1) (1 3) (2 2) (1 4))
 
-;; Exercise 3.70
+;; Exercise 3.70 (page 474)
 
-;; TODO
+(define (merge-weighted s t weight)
+  (cond ((stream-null? s) t)
+        ((stream-null? t) s)
+        (else
+         (let ((s-car (stream-car s))
+               (t-car (stream-car t)))
+           (cond ((< (weight s-car) (weight t-car))
+                  (cons-stream s-car (merge-weighted (stream-cdr s) t weight)))
+                 ((< (weight t-car) (weight s-car))
+                  (cons-stream t-car (merge-weighted (stream-cdr t) s weight)))
+                 (else (cons-stream
+                        s-car
+                        (cons-stream t-car (merge-weighted (stream-cdr s)
+                                                           (stream-cdr t) weight)))))))))
+                  
+(define (weighted-pairs s t weight)
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (merge-weighted (stream-map (lambda (x) (list (stream-car s) x)) (stream-cdr t))
+                   (weighted-pairs (stream-cdr s) (stream-cdr t) weight)
+                   weight)))
 
-;; Exercise 3.71
+;; a)
+(define wp (weighted-pairs integers integers (lambda (p) (apply + p))))
+(map (lambda (x) (stream-ref wp x)) '(0 1 2 3 4 5 6 7 8 9))
+;; ((1 1) (1 2) (1 3) (2 2) (1 4) (2 3) (1 5) (2 4) (3 3) (2 5))
 
-;; TODO
-;; A this click to recording: https://www.youtube.com/watch?v=Qi4SDDjgHdU
+;; Exercise 3.71 (page 464-5)
+
+;; Add this click to recording: https://www.youtube.com/watch?v=Qi4SDDjgHdU
+
+(define (ramanujan-numbers n)
+  (let* ((cube (lambda (x) (* x x x)))
+         (ram-w (lambda (p) (apply + (map cube p)))))
+    (define (iter s left)
+      (cond ((= left 0) 'done)
+            (else
+             (let ((a (stream-car s))
+                   (b (stream-car (stream-cdr s))))
+               (if (= (ram-w a) (ram-w b))
+                   (begin (display (list (ram-w a) a b))
+                          (newline)
+                          (iter (stream-cdr s) (- left 1)))
+                   (iter (stream-cdr s) left))))))
+    (iter (weighted-pairs integers integers ram-w) n)))
+
+;; Test
+(ramanujan-numbers 5)
+;; (1729 (9 10) (1 12))
+;; (4104 (9 15) (2 16))
+;; (13832 (18 20) (2 24))
+;; (20683 (19 24) (10 27))
+;; (32832 (18 30) (4 32))
+;; done
