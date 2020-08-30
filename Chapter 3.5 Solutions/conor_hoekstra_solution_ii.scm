@@ -77,4 +77,36 @@
 
 ;; Exercise 3.81 (page 481)
 
-;; TODO
+(define random
+  (let ((a 69069)
+        (c 1.0)
+        (m (expt 2 32.0))
+        (seed 19380110)
+        (orig-seed 19380110))
+    (lambda (args)
+      (if (list? args)
+          (set! seed (cadr args))
+          (set! seed (modulo (+ (* seed a) c) m)))
+      (/ seed m))))
+
+(define (random-stream input-stream)
+  (stream-map random input-stream))
+
+(define temp (cons-stream '(reset 19380110) (cons-stream 'new temp)))
+(define r (random-stream temp))
+
+;; Test
+(map (lambda (x) (stream-ref r x))
+     '(0 1 2 3 4 5 6 7 8 9 10))
+
+; (0.004512283485382795
+;  0.6589080521371216
+;  0.004512283485382795
+;  0.6589080521371216
+;  0.004512283485382795
+;  0.6589080521371216
+;  0.004512283485382795
+;  0.6589080521371216
+;  0.004512283485382795
+;  0.6589080521371216
+;  0.004512283485382795)
