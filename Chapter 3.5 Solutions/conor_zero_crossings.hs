@@ -1,4 +1,4 @@
--- Makes use of the W and B combinators (Warbler and Bluebird)
+-- Makes use of the C and B combinators (Cardinal and Bluebird)
 import Data.List.HT (mapAdjacent)
 
 zeroCrossings = map (truncate . signum) 
