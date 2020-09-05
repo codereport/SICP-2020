@@ -439,3 +439,26 @@
 (eval '(define (add x y)
          (let ((a x) (b y)) (+ a b))) the-global-environment) ; ok
 (eval '(add 1 2) the-global-environment) ; 3
+
+;; Exercise 4.9 (page 511)
+
+;; implementing while
+; (while <predicate> <body>)
+
+(define (while? exp) (tagged-list? exp 'while))
+
+;; TODO
+
+;; Exercise 4.14 (page 522)
+
+;;Interpreter output from defining map as a primitive
+
+;;; M-Eval input:
+;(map + '(1 2 3) '(2 3 4))
+;. . application: not a procedure;
+; expected a procedure that can be applied to arguments
+;  given: (primitive #<procedure:+>)
+;  arguments...:
+
+; My impression is any higher-order procedure will fail - something to do with
+; the "underlying" scheme not being able to recognize procedures from "our" Scheme
