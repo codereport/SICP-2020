@@ -26,6 +26,7 @@
         ((cond?            exp) (eval (cond->if exp) env))          ; #3 Special Form
         ((and?             exp) (eval-and exp env))                 ; #3 Special Form
         ((or?              exp) (eval-or exp env))                  ; #3 Special Form
+        ((let?             exp) (eval (let->combination exp) env))  ; #3 Special Form
         ((application?     exp) (my-apply (eval (operator exp) env) ; #4 Procedure Call
                                        (list-of-values
                                         (operands exp) env)))
@@ -415,3 +416,26 @@
 ;; Tests
 (eval '(and false true) the-global-environment) ; #f
 (eval '(and true true) the-global-environment)  ; #t
+
+;; Exercise 4.6 (page 509-10)
+
+;  (let ((a b)
+;        (c d)) ...) ; ->
+
+;  (lambda (a c) (...) (b d)))
+
+(define (let? exp) (tagged-list? exp 'let))
+
+(define (let->combination exp)
+  (let* ((bindings       (cadr exp))
+         (binding-names  (map car bindings))
+         (binding-values (map cadr bindings))
+         (body     (cddr exp)))
+    (cons (make-lambda binding-names
+                       body)
+          binding-values)))
+
+;; Test
+(eval '(define (add x y)
+         (let ((a x) (b y)) (+ a b))) the-global-environment) ; ok
+(eval '(add 1 2) the-global-environment) ; 3
