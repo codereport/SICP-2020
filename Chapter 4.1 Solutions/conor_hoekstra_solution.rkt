@@ -1,4 +1,9 @@
+#lang sicp
+
+(define apply-in-underlying-scheme apply) ; from footnote on page 520
+
 ;; https://groups.csail.mit.edu/mac/ftpdir/scheme-7.4/doc-html/scheme_2.html#SEC24
+
 ;; A Scheme expression is a construct that returns a value. An expression may be a:
 ;;    1. literal,
 ;;    2. a variable reference,
@@ -6,26 +11,28 @@
 ;;    4. or a procedure call.
 
 (define (eval exp env)
-  (cond ((self-evaluating? exp) exp)                             ; #1 Literal
-        ((variable?        exp) (lookup-variable-value exp env)) ; #2 Variable Reference
-        ((quoted?          exp) (text-of-quotation exp))         ; #1 Literal
-        ((assignment?      exp) (eval-assignment exp env))       ; #3 Special Form
-        ((definition?      exp) (eval-definition exp env))       ; #3 Special Form
-        ((if?              exp) (eval-if exp env))               ; #3 Special Form
-        ((lambda?          exp) (make-procedure                  ; #3 Special Form
+  (cond ((self-evaluating? exp) exp)                                ; #1 Literal
+        ((variable?        exp) (lookup-variable-value exp env))    ; #2 Variable Reference
+        ((quoted?          exp) (text-of-quotation exp))            ; #1 Literal ??
+        ((assignment?      exp) (eval-assignment exp env))          ; #3 Special Form
+        ((definition?      exp) (eval-definition exp env))          ; #3 Special Form
+        ((if?              exp) (eval-if exp env))                  ; #3 Special Form
+        ((lambda?          exp) (make-procedure                     ; #3 Special Form
                                  (lambda-parameters exp)
                                  (lambda-body exp)
                                  env))
-        ((begin?           exp) (eval-sequence                   ; #3 Special Form
+        ((begin?           exp) (eval-sequence                      ; #3 Special Form
                                  (begin-actions exp) env))
-        ((cond?            exp) (eval (cond->if? exp) env))      ; #3 Special Form
-        ((application?     exp) (apply (eval (operator exp) env) ; #4 Procedure Call
+        ((cond?            exp) (eval (cond->if exp) env))          ; #3 Special Form
+        ((and?             exp) (eval-and exp env))                 ; #3 Special Form
+        ((or?              exp) (eval-or exp env))                  ; #3 Special Form
+        ((application?     exp) (my-apply (eval (operator exp) env) ; #4 Procedure Call
                                        (list-of-values
                                         (operands exp) env)))
         (else
          (error "Unknown expression type: FAIL" exp))))
 
-(define (apply procedure arguments)
+(define (my-apply procedure arguments)
   (cond ((primitive-procedure? procedure)
          (apply-primitive-procedure procedure arguments))
         ((compound-procedure? procedure)
@@ -81,8 +88,9 @@
 ;; End of Exercise 4.1
 
 (define (self-evaluating? exp)
-  (cond ((number? exp) true)
-        ((string? exp) true)
+  (cond ((number?  exp) true)
+        ((string?  exp) true)
+        ;((boolean? exp) true)
         (else false)))
 
 (define (variable? exp) (symbol? exp))
@@ -174,3 +182,236 @@
 ;;    because "define" is a special form not a procedure
 
 ;; b) TODO
+
+;; MOVED EXERCISED 4.4 to 4.9 down
+
+(define (true? x) (not (eq? x false))) ; enables: eval-if; if? clause in eval
+(define (false? x) (eq? x false))
+
+(define (make-procedure parameters body env) ; enables: lambda? clause in eval
+  (list 'procedure parameters body env))
+(define (compound-procedure? p)
+  (tagged-list? p 'procedure))
+(define (procedure-parameters p) (cadr p))
+(define (procedure-body p) (caddr p))
+(define (procedure-environment p) (cadddr p))
+
+(define (enclosing-environment env) (cdr env))
+(define (first-frame env) (car env))
+(define the-empty-environment '())
+
+(define (make-frame variables values)
+  (cons variables values))
+(define (frame-variables frame) (car frame))
+(define (frame-values frame) (cdr frame))
+(define (add-binding-to-frame! var val frame)
+  (set-car! frame (cons var (car frame)))  ; at this point need to switch to #sicp
+  (set-cdr! frame (cons val (cdr frame))))
+
+(define (extend-environment vars vals base-env)
+  (if (= (length vars) (length vals))
+      (cons (make-frame vars vals) base-env)
+      (if (< (length vars) (length vals))
+          (error "Too many arguments supplied" vars vals)
+          (error "Too few arguments supplied" vars vals))))
+
+(define (lookup-variable-value var env) ; enables: variable? clause of eval
+  (define (env-loop env)
+    (define (scan vars vals) ; :(
+      (cond ((null? vars)
+             (env-loop (enclosing-environment env)))
+            ((eq? var (car vars)) (car vals))
+            (else (scan (cdr vars) (cdr vals)))))
+    (if (eq? env the-empty-environment)
+        (error "Unbound variable" var)
+        (let ((frame (first-frame env)))
+          (scan (frame-variables frame)
+                (frame-values frame)))))
+  (env-loop env))
+
+(define (set-variable-value! var val env) ; enables: eval-assignment;
+  (define (env-loop env)                  ;          assignment? clause of eval
+    (define (scan vars vals)
+      (cond ((null? vars)
+             (env-loop (enclosing-environment env)))
+            ((eq? var (car vars)) (set-car! vals val))
+            (else (scan (cdr vars) (cdr vals)))))
+    (if (eq? env the-empty-environment)
+        (error "Unbound variable: SET!" var)
+        (let ((frame (first-frame env)))
+          (scan (frame-variables frame)
+                (frame-values frame)))))
+  (env-loop env))
+
+(define (define-variable! var val env) ; enables: eval-definition
+  (let ((frame (first-frame env)))     ;          definition? clause of eval
+    (define (scan vars vals)
+      (cond ((null? vars)
+             (add-binding-to-frame! var val frame))
+            ((eq? var (car vars)) (set-car! vals val))
+            (else (scan (cdr vars) (cdr vals)))))
+    (scan (frame-variables frame) (frame-values frame))))
+
+(define (primitive-procedure? proc) ; helps enable apply
+  (tagged-list? proc 'primitive))
+(define (primitive-implementation proc) (cadr proc))
+
+(define primitive-procedures
+  (list (list 'car car)
+        (list 'cdr cdr)
+        (list 'cons cons)
+        (list 'null? null?)
+        ;;⟨ more primitives ⟩
+        ))
+(define (primitive-procedure-names)
+  (map car primitive-procedures))
+(define (primitive-procedure-objects)
+  (map (lambda (proc) (list 'primitive (cadr proc)))
+       primitive-procedures))
+
+(define (apply-primitive-procedure proc args)
+  (apply-in-underlying-scheme
+   (primitive-implementation proc) args))
+
+(define input-prompt  ";;; M-Eval input:")
+(define output-prompt ";;; M-Eval value:")
+
+(define (driver-loop)
+  (prompt-for-input input-prompt)
+  (let ((input (read)))
+    (let ((output (eval input the-global-environment)))
+      (announce-output output-prompt)
+      (user-print output)))
+  (driver-loop))
+
+(define (prompt-for-input string)
+  (newline) (newline) (display string) (newline))
+
+(define (announce-output string)
+  (newline) (display string) (newline))
+
+(define (user-print object)
+  (if (compound-procedure? object)
+      (display (list 'compound-procedure
+                     (procedure-parameters object)
+                     (procedure-body object)
+                     '<procedure-env>))
+      (display object)))
+
+(define (setup-environment)
+  (let ((initial-env
+         (extend-environment (primitive-procedure-names)
+                             (primitive-procedure-objects)
+                             the-empty-environment)))
+    (define-variable! 'true true initial-env)
+    (define-variable! 'false false initial-env)
+    initial-env))
+(define the-global-environment (setup-environment))
+
+;(driver-loop) <- to kick things off
+
+;; Exercise 4.4 (page 508-9)
+
+;; :(
+
+(define (eval-working exp env)
+  (cond ((self-evaluating? exp) exp)                              ; #1 Literal
+        ;((variable?        exp) (lookup-variable-value exp env)) ; #2 Variable Reference
+        ((quoted?          exp) (text-of-quotation exp))          ; #1 Literal ??
+        ;((assignment?      exp) (eval-assignment exp env))       ; #3 Special Form
+        ;((definition?      exp) (eval-definition exp env))       ; #3 Special Form
+        ;((if?              exp) (eval-if exp env))               ; #3 Special Form
+        ;((lambda?          exp) (make-procedure                  ; #3 Special Form
+        ;                         (lambda-parameters exp)
+        ;                         (lambda-body exp)
+        ;                         env))
+        ((begin?           exp) (eval-sequence                    ; #3 Special Form
+                                 (begin-actions exp) env))
+        ((cond?            exp) (eval (cond->if exp) env))        ; #3 Special Form
+        ((application?     exp) (apply (eval (operator exp) env)  ; #4 Procedure Call
+                                       (list-of-values
+                                        (operands exp) env)))
+        (else
+         (error "Unknown expression type: FAIL" exp))))
+
+;; actual solution
+
+(define (and? exp) (tagged-list? exp 'and))
+(define (or? exp)  (tagged-list? exp 'or))
+
+(define (eval-or-failing exps env)
+  (cond ((null? exps) false)
+        ((true? (eval (car exps) env)) true)
+        (else (eval-or (cdr exps) env))))
+
+;(eval '(or #f #f #f) '()) ; FAILS with: Unbound variable or
+
+;; :(
+
+(define (eval-failing exp env)
+  (cond ((self-evaluating? exp) exp)                             ; #1 Literal
+        ((variable?        exp) (lookup-variable-value exp env)) ; #2 Variable Reference
+        ((quoted?          exp) (text-of-quotation exp))         ; #1 Literal ??
+        ((assignment?      exp) (eval-assignment exp env))       ; #3 Special Form
+        ((definition?      exp) (eval-definition exp env))       ; #3 Special Form
+        ((if?              exp) (eval-if exp env))               ; #3 Special Form
+        ((lambda?          exp) (make-procedure                  ; #3 Special Form
+                                 (lambda-parameters exp)
+                                 (lambda-body exp)
+                                 env))
+        ((begin?           exp) (eval-sequence                   ; #3 Special Form
+                                 (begin-actions exp) env))
+        ((cond?            exp) (eval (cond->if exp) env))       ; #3 Special Form
+        ;((and?             exp) (eval-and exp env))             ; #3 Special Form
+        ;((or?              exp) (eval-or exp env))              ; #3 Special Form
+        ((application?     exp) (apply (eval (operator exp) env) ; #4 Procedure Call
+                                       (list-of-values
+                                        (operands exp) env)))
+        (else
+         (error "Unknown expression type: FAIL" exp))))
+
+;(eval '(or #f #f #f) '()) ; FAILS with: Unbound variable or
+; The reason for the variable above is that the '(..) is a symbol and
+; therefore is read in as a variable: needs to be unquoted
+
+;; After this though, still needed to make a change to self-evaluating?
+
+;(eval (or #f #f) '()) ; #f
+;(eval (or #f #t) '()) ; #t 
+
+(define (eval-and-failing exps env)
+  (display "eval-and called") ;; added this after I wrote tests, wtf
+  (newline)
+  (cond ((null? exps) true)
+        ((false? (eval (car exps) env)) false)
+        (else (eval-and (cdr exps) env))))
+
+;(eval (and #f #f) '()) ; #f
+;(eval (and #f #t) '()) ; #f
+;(eval (and #t #t) '()) ; #t
+
+;; sighs will come back after 4.1.4
+;; (not knowing what to pass as env should have been a clue)
+
+(define (eval-or tag-and-exps env)
+  (define (iter exps)
+    (cond ((null? exps) false)
+          ((true? (eval (car exps) env)) true)
+          (else (iter (cdr exps)))))
+  (iter (cdr tag-and-exps)))
+
+;; Tests
+(eval '(or true true) the-global-environment)   ; #t
+(eval '(or false true) the-global-environment)  ; #t
+(eval '(or false false) the-global-environment) ; #f
+
+(define (eval-and tag-and-exps env)
+  (define (iter exps)
+    (cond ((null? exps) true)
+          ((false? (eval (car exps) env)) false)
+          (else (iter (cdr exps)))))
+  (iter (cdr tag-and-exps)))
+
+;; Tests
+(eval '(and false true) the-global-environment) ; #f
+(eval '(and true true) the-global-environment)  ; #t
