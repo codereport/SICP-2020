@@ -447,7 +447,36 @@
 
 (define (while? exp) (tagged-list? exp 'while))
 
-;; TODO
+(define (while->combination exp)
+  (let ((predicate (cadr exp))
+        (body      (cddr exp)))
+    (sequence->exp 
+     (list (list 'define  
+                 (list 'while-iter) 
+                 (make-if predicate
+                          (sequence->exp
+                           (append body (list (list 'while-iter)))) 
+                          'true)) 
+           (list 'while-iter)))))
+
+;; test
+(eval '(define (squares-less-than val)
+         (let ((i 0))
+           (while (< (* i i) val)
+                  (println (* i i))
+                  (set! i (+ i 1))))) the-global-environment)
+
+(eval '(squares-less-than 1000) the-global-environment)
+; 0
+; 1
+; 4
+; 9
+; 16
+; 25
+; 36
+; 49
+; 64
+; 81 ...
 
 ;; Exercise 4.14 (page 522)
 
