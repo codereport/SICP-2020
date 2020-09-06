@@ -182,8 +182,6 @@
 ;; a) It will try to apply the operator "define" to the operands "x 3" and fail
 ;;    because "define" is a special form not a procedure
 
-;; b) TODO
-
 ;; MOVED EXERCISED 4.4 to 4.9 down
 
 (define (true? x) (not (eq? x false))) ; enables: eval-if; if? clause in eval
