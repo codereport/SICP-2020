@@ -13,7 +13,7 @@
 (define (eval exp env)
   (cond ((self-evaluating? exp) exp)                                ; #1 Literal
         ((variable?        exp) (lookup-variable-value exp env))    ; #2 Variable Reference
-        ((quoted?          exp) (text-of-quotation exp))            ; #1 Literal ??
+        ((quoted?          exp) (text-of-quotation exp))            ; #3 Special Form
         ((assignment?      exp) (eval-assignment exp env))          ; #3 Special Form
         ((definition?      exp) (eval-definition exp env))          ; #3 Special Form
         ((if?              exp) (eval-if exp env))                  ; #3 Special Form
