@@ -172,10 +172,6 @@
 
 ;; Exercise 4.27 (page 551)
 
-(eval '(define count 0) the-global-environment)
-(eval '(define (id x) (set! count (+ count 1)) x) the-global-environment)
-(eval '(define w (id (id 10))) the-global-environment)
-
 ;;; L-Eval input:
 (define count 0)
 ;;; L-Eval value: 
