@@ -214,6 +214,28 @@ count
 
 ;; TODO
 
-;; Exercise 4.33
+;; Exercise 4.33 (page 558)
 
-;; TODO
+(eval '(define (cons x y) (lambda (m) (m x y))) the-global-environment)
+(eval '(define (car z) (z (lambda (p q) p))) the-global-environment)
+(eval '(define (cdr z) (z (lambda (p q) q))) the-global-environment)
+
+(eval '(car '(1 2 3)) the-global-environment)
+;; . . Unknown procedure type: APPLY (1 2 3)
+
+;; text-of-quotation - Before
+(define (text-of-quotation exp) (cadr exp))
+
+; text-of-quotation - After
+(define (text-of-quotation exp)
+  (define (quotation->cons exp)
+    (if (pair? exp)
+        (list 'cons
+              (quotation->cons (car exp))
+              (quotation->cons (cdr exp)))
+        exp))
+  (let ((text (cadr exp)))
+    (if (pair? text)
+        (eval (quotation->cons text) the-global-environment)
+        text)))
+        
