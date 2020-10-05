@@ -205,8 +205,8 @@ count
 ;;; L-Eval value: 
 2
 
-;; w becomes a thunkn and only one of the calls to id occurs, setting it 1.
-;; Only after evaluated w does it set the counter to 2
+;; w becomes a thunk and only one of the calls to id occurs, setting it to 1.
+;; Only after evaluating w does it set the counter to 2.
 
 ;; Exercise 4.28 (page 551)
 
