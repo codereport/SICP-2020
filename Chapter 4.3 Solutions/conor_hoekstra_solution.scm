@@ -91,7 +91,23 @@
 (liars-puzzle) ; '((3 5 2 1 4))
 
 ;; 4.49 TODO
-;; 4.50 TODO
+
+;; Exercise 4.50
+
+(define (ramb? exp) (tagged-list? exp 'ramb))
+(define (ramb-choices exp) (cdr exp))
+
+(define (analyze-ramb exp)
+  (let ((cprocs (map analyze (amb-choices exp))))
+    (lambda (env succeed fail)
+      (define (try-next choices)
+        (if (null? choices)
+            (fail)
+            ((car choices)
+             env
+             succeed
+             (lambda () (try-next (cdr choices))))))
+      (try-next (shuffle cprocs)))))
 
 ;; Code changes from 4.1.7 Analyzing Evaluator 
 
@@ -257,6 +273,18 @@
         (else
          (error "Unknown procedure type: EXECUTE-APPLICATION"
                 proc))))
+
+(define (analyze-amb exp)
+  (let ((cprocs (map analyze (amb-choices exp))))
+    (lambda (env succeed fail)
+      (define (try-next choices)
+        (if (null? choices)
+            (fail)
+            ((car choices)
+             env
+             succeed
+             (lambda () (try-next (cdr choices))))))
+      (try-next cprocs))))
 
 (define input-prompt  ";;; Amb-Eval input:")
 (define output-prompt ";;; Amb-Eval value:")
