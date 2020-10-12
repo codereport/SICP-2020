@@ -69,7 +69,27 @@
 
 (multiple-dwelling) ; '((3 2 4 5 1))
 
-;; 4.42 TODO
+;; Exercise 4.42 (page 570)
+
+(define (is-possible? lst)
+  (let ((betty (first  lst))
+        (ethel (second lst))
+        (joan  (third  lst))
+        (kitty (fourth lst))
+        (mary  (fifth  lst)))
+    (cond ((eq? (= kitty 2) (= betty 3)) #f)
+          ((eq? (= ethel 1) (= joan  2)) #f)
+          ((eq? (= joan  3) (= ethel 5)) #f)
+          ((eq? (= kitty 2) (= mary  4)) #f)
+          ((eq? (= mary  4) (= betty 1)) #f)
+          (else #t))))
+
+(define (liars-puzzle)
+  (~>> (permutations (range 1 6))
+       (filter is-possible?)))
+
+(liars-puzzle) ; '((3 5 2 1 4))
+
 ;; 4.49 TODO
 ;; 4.50 TODO
 
