@@ -406,11 +406,6 @@
 (define (display-stream s) (stream-for-each display-line s))
 (define (display-line x)   (newline) (display x))
 
-;; from Cezar
-
-;; (define (put op type item) (hash-set! ops (opkey op type) item))    
-;; (define (get op type) (hash-ref ops (opkey op type)))
-
 ;; from former assignment
 
 (define (stream-car stream) (car stream))
