@@ -1,10 +1,75 @@
 
 ;; Exercise 4.55 (page 605)
 
-;; (supervisor ?x (Bitdiddle Ben))
-;; (job ?x (accounting . ?y)) 
-;; (address ?x (Slumerville . ?y)) 
+;;; Query input:
+(supervisor ?x (Bitdiddle Ben))
 
+;;; Query results:
+(supervisor (Tweakit Lem E) (Bitdiddle Ben))
+(supervisor (Fect Cy D) (Bitdiddle Ben))
+(supervisor (Hacker Alyssa P) (Bitdiddle Ben))
+
+;;; Query input:
+(job ?x (accounting . ?y))
+
+;;; Query results:
+(job (Cratchet Robert) (accounting scrivener))
+(job (Scrooge Eben) (accounting chief accountant))
+
+;;; Query input:
+(address ?x (Slumerville . ?y)) 
+
+;;; Query results:
+(address (Aull DeWitt) (Slumerville (Onion Square) 5))
+(address (Reasoner Louis) (Slumerville (Pine Tree Road) 80))
+(address (Bitdiddle Ben) (Slumerville (Ridge Road) 10))
+
+;; Exercise 4.58 (page 610)
+
+;;; Query input:
+ (assert! (rule (bigshot ?x ?div) 
+                (and (job ?x (?div . ?rest)) 
+                     (or (not (supervisor ?x ?y)) 
+                         (and (supervisor ?x ?y) 
+                              (not (job ?y (?div . ?r)))))))) 
+
+;; Assertion added to data base.
+
+;;; Query input:
+(bigshot . ?x)
+
+;;; Query results:
+(bigshot (Warbucks Oliver) administration)
+(bigshot (Scrooge Eben) accounting)
+(bigshot (Bitdiddle Ben) computer)
+
+;; Exercise 4.61 (page 614)
+
+;;; Query input:
+(assert! (rule (?x next-to ?y in (?x ?y . ?u))))
+
+;; Assertion added to data base.
+
+;;; Query input:
+(assert! (rule (?x next-to ?y in (?v . ?z))
+         (?x next-to ?y in ?z)))
+
+;; Assertion added to data base.
+
+;;; Query input:
+(?x next-to ?y in (1 (2 3) 4))
+
+;;; Query results:
+((2 3) next-to 4 in (1 (2 3) 4))
+(1 next-to (2 3) in (1 (2 3) 4))
+
+;;; Query input:
+(?x next-to
+1 in (2 1 3 1))
+
+;;; Query results:
+(3 next-to 1 in (2 1 3 1))
+(2 next-to 1 in (2 1 3 1))
 
 ;; qeval Interpretter
 
