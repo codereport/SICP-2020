@@ -14,3 +14,5 @@ These are a list of the links that were shared in the Meetup.
 * [North Denver C++ 2020 Lightning Talks](https://www.youtube.com/watch?v=cEDLxRqaY9w)
 * [Constructing Generic Algorithms: Principles and Practice - Ben Deane - CppCon 2020](https://www.youtube.com/watch?v=InMh3JxbiTs)
 * [Computer Architecture Quantitative](https://www.amazon.ca/Computer-Architecture-Quantitative-John-Hennessy/dp/012383872X)
+* [HackerNews: The Curious Case of Swift's Adoption of Smalltalk Keyword Syntax](https://news.ycombinator.com/item?id=23517269)
+* [Blog - The Curious Case of Swift's Adoption of Smalltalk Keyword Syntax](https://blog.metaobject.com/2020/06/the-curious-case-of-swift-adoption-of.html)
