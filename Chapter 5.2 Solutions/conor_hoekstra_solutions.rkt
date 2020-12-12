@@ -1,4 +1,4 @@
-#lang racket
+#lang sicp
 
 ;; Code from the Book
 
@@ -134,10 +134,12 @@
        (lambda (insts labels)
          (let ((next-inst (car text)))
            (if (symbol? next-inst)
-               (receive insts
-                        (cons (make-label-entry next-inst
-                                                insts)
-                              labels))
+               (if (assoc next-inst labels)
+                   (error "repeated label: " next-inst)
+                   (receive insts
+                            (cons (make-label-entry next-inst
+                                                    insts)
+                                  labels)))
                (receive (cons (make-instruction next-inst)
                               insts)
                         labels)))))))
@@ -311,6 +313,7 @@
         (else (error "Unknown expression type: ASSEMBLE" exp))))
 
 (define (register-exp? exp) (tagged-list? exp 'reg))
+
 (define (register-exp-reg exp) (cadr exp))
 (define (constant-exp? exp) (tagged-list? exp 'const))
 (define (constant-exp-value exp) (cadr exp))
@@ -341,3 +344,90 @@
         (error "Unknown operation: ASSEMBLE"
                symbol))))
 
+
+;; missing code
+
+;; from page 502
+
+(define (tagged-list? exp tag)
+  (if (pair? exp)
+      (eq? (car exp) tag)
+      false))
+
+;; Test gcd-machine (page 697)
+
+(define gcd-machine
+  (make-machine
+   '(a b t)
+   (list (list 'rem remainder) (list '= =))
+   '(test-b (test (op =) (reg b) (const 0))
+            (branch (label gcd-done))
+            (assign t (op rem) (reg a) (reg b))
+            (assign a (reg b))
+            (assign b (reg t))
+            (goto (label test-b))
+            gcd-done)))
+
+(set-register-contents! gcd-machine 'a 30) ; done
+(set-register-contents! gcd-machine 'b 42) ; done
+(start gcd-machine)                        ; done
+(get-register-contents gcd-machine 'a)     ; 6
+
+;; Exercise 5.8 (page ??)
+
+(define exercise-5-8
+  (make-machine
+   '(a)
+   (list (list 'print display))
+   '(start
+     (goto (label here))
+     here
+     (assign a (const 3))
+     (goto (label there))
+    here
+    (assign a (const 4))
+    (goto (label there))
+    there
+    (perform (op print) (reg a)))))
+
+(start exercise-5-8) ; 3
+
+;; before
+
+(define (extract-labels-before text receive)
+  (if (null? text)
+      (receive '() '())
+      (extract-labels
+       (cdr text)
+       (lambda (insts labels)
+         (let ((next-inst (car text)))
+           (if (symbol? next-inst)
+               (receive insts
+                        (cons (make-label-entry next-inst
+                                                insts)
+                              labels))
+               (receive (cons (make-instruction next-inst)
+                              insts)
+                        labels)))))))
+
+;; after
+
+(define (extract-labels-after text receive)
+  (if (null? text)
+      (receive '() '())
+      (extract-labels
+       (cdr text)
+       (lambda (insts labels)
+         (let ((next-inst (car text)))
+           (if (symbol? next-inst)
+               (if (assoc next-inst labels)
+                   (error "repeated label: " next-inst)
+                   (receive insts
+                            (cons (make-label-entry next-inst
+                                                    insts)
+                                  labels)))
+               (receive (cons (make-instruction next-inst)
+                              insts)
+                        labels)))))))
+
+;; (start exercise-5-8) ; . . repeated label:  here
