@@ -344,7 +344,6 @@
         (error "Unknown operation: ASSEMBLE"
                symbol))))
 
-
 ;; missing code
 
 ;; from page 502
@@ -431,3 +430,71 @@
                         labels)))))))
 
 ;; (start exercise-5-8) ; . . repeated label:  here
+
+;; Exercise 5.13 (page 718)
+
+(define (fold op init lst)
+  (define (fold-iter acc l)
+    (if (null? l) 
+        acc
+        (fold-iter (op acc (car l))
+                   (cdr l))))
+  (fold-iter init lst))
+
+(define (filter pred lst)
+  (fold (lambda (a b) (if (pred b)
+                          (cons b a)
+                          a)) '() lst))
+
+;; before
+
+(define (make-machine-before register-names ops controller-text)
+  (let ((machine (make-new-machine)))
+    (for-each
+     (lambda (register-name)
+       ((machine 'allocate-register) register-name))
+     register-names)
+    ((machine 'install-operations) ops)
+    ((machine 'install-instruction-sequence)
+     (assemble controller-text machine))
+    machine))
+
+;; after
+
+(define (get-register-names controller-text)
+   (map cadr
+        (filter (lambda (x) (and (list? x) (eq? (car x) 'assign)))
+                controller-text)))
+
+(define (make-machine-after ops controller-text)
+  (let ((machine (make-new-machine))
+        (register-names (get-register-names controller-text)))
+    (for-each
+     (lambda (register-name)
+       ((machine 'allocate-register) register-name))
+     register-names)
+    ((machine 'install-operations) ops)
+    ((machine 'install-instruction-sequence)
+     (assemble controller-text machine))
+    machine))
+
+;; test
+
+(define gcd-machine-2
+  (make-machine-after
+   ;'(a b t)
+   (list (list 'rem remainder) (list '= =))
+   '(test-b (test (op =) (reg b) (const 0))
+            (branch (label gcd-done))
+            (assign t (op rem) (reg a) (reg b))
+            (assign a (reg b))
+            (assign b (reg t))
+            (goto (label test-b))
+            gcd-done)))
+
+(set-register-contents! gcd-machine-2 'a 30) ; done
+(set-register-contents! gcd-machine-2 'b 42) ; done
+(start gcd-machine-2)                        ; done
+(get-register-contents gcd-machine-2 'a)     ; 6
+
+;; Exericise 5.16 (page 721)
