@@ -372,7 +372,7 @@
 (start gcd-machine)                        ; done
 (get-register-contents gcd-machine 'a)     ; 6
 
-;; Exercise 5.8 (page ??)
+;; Exercise 5.8 (page 708)
 
 (define exercise-5-8
   (make-machine
@@ -498,3 +498,35 @@
 (get-register-contents gcd-machine-2 'a)     ; 6
 
 ;; Exericise 5.16 (page 721)
+
+;; copy code from http://community.schemewiki.org/?sicp-ex-5.16
+
+(trace-on-instruction gcd-machine)
+
+;; output
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
+(assign t (op rem) (reg a) (reg b))
+(assign a (reg b))
+(assign b (reg t))
+(goto (label test-b))
+(test (op =) (reg b) (const 0))
+(branch (label gcd-done))
