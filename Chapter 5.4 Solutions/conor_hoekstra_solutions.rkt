@@ -14,27 +14,6 @@
 ;;    3. a special form,
 ;;    4. or a procedure call.
 
-(define (eval exp env)
-  (cond ((self-evaluating? exp) exp)                                ; #1 Literal
-        ((variable?        exp) (lookup-variable-value exp env))    ; #2 Variable Reference
-        ((quoted?          exp) (text-of-quotation exp))            ; #3 Special Form
-        ((assignment?      exp) (eval-assignment exp env))          ; #3 Special Form
-        ((definition?      exp) (eval-definition exp env))          ; #3 Special Form
-        ((if?              exp) (eval-if exp env))                  ; #3 Special Form
-        ((lambda?          exp) (make-procedure                     ; #3 Special Form
-                                 (lambda-parameters exp)
-                                 (lambda-body exp)
-                                 env))
-        ((begin?           exp) (eval-sequence                      ; #3 Special Form
-                                 (begin-actions exp) env))
-        ((cond?            exp) (eval (cond->if exp) env))          ; #3 Special Form
-        ;((let?             exp) (eval (let->combination exp) env))  ; #3 Special Form
-        ((application?     exp) (my-apply (eval (operator exp) env) ; #4 Procedure Call
-                                       (list-of-values
-                                        (operands exp) env)))
-        (else
-         (error "Unknown expression type: FAIL" exp))))
-
 (define (my-apply procedure arguments)
   (cond ((primitive-procedure? procedure)
          (apply-primitive-procedure procedure arguments))
@@ -244,10 +223,14 @@
         (list 'cons cons)
         (list 'null? null?)
         (list '+ +)
+        (list '> >)
+        (list '= =)
         ;;⟨ more primitives ⟩
         ))
+
 (define (primitive-procedure-names)
   (map car primitive-procedures))
+
 (define (primitive-procedure-objects)
   (map (lambda (proc) (list 'primitive (cadr proc)))
        primitive-procedures))
@@ -258,14 +241,6 @@
 
 (define input-prompt  ";;; M-Eval input:")
 (define output-prompt ";;; M-Eval value:")
-
-(define (driver-loop)
-  (prompt-for-input input-prompt)
-  (let ((input (read)))
-    (let ((output (eval input the-global-environment)))
-      (announce-output output-prompt)
-      (user-print output)))
-  (driver-loop))
 
 (define (prompt-for-input string)
   (newline) (newline) (display string) (newline))
@@ -717,6 +692,7 @@
         ;(list 'no-conds? no-conds?)
         ;(list 'first-cond first-cond)
         ;(list 'rest-conds rest-conds)
+        (list 'cond->if cond->if)
         (list 'cond-predicate cond-predicate)
         (list 'cond-actions cond-actions)
         (list 'cond-else-clause? cond-else-clause?)
@@ -780,6 +756,8 @@
      (branch (label ev-definition))
      (test (op if?) (reg exp))
      (branch (label ev-if))
+     (test (op cond?) (reg exp)) ; added for Exercise 5.23
+     (branch (label ev-cond))    ; added for Exercise 5.23
      (test (op lambda?) (reg exp))
      (branch (label ev-lambda))
      (test (op begin?) (reg exp))
@@ -936,6 +914,10 @@
      (assign exp (op if-consequent) (reg exp))
      (goto (label eval-dispatch))
      ;;
+     ;; Added for Exercise 5.23
+     ev-cond 
+     (assign exp (op cond->if) (reg exp)) 
+     (goto (label ev-if)) 
      ;; Assignments and definitions
      ev-assignment
      (assign unev (op assignment-variable) (reg exp))
@@ -978,3 +960,44 @@
      )))
 
 (start eceval)
+
+;; Exercise 5.23 (page 758)
+
+;;EC-Eval input:
+(define (positive? x)
+  (cond ((> x 0) 'positive)
+        ((= x 0) 'zero)
+        (else 'negative)))
+
+;; . . Unbound variable cond
+
+;(define (positive? x) (cond ((> x 0) 'positive) ((= x 0) 'zero) (else 'negative)))
+
+;; After changes
+
+;;EC-Eval input:
+(define (positive? x)
+  (cond ((> x 0) 'positive)
+        ((= x 0) 'zero)
+        (else 'negative)))
+
+;;EC-Eval value:
+;; ok
+
+;;EC-Eval input:
+(positive? 10)
+
+;;EC-Eval value:
+;;  positive
+
+;;EC-Eval input:
+(positive? 0)
+
+;;EC-Eval value:
+;;  zero
+
+;;EC-Eval input:
+(positive? -10)
+
+;;EC-Eval value:
+;;  negative
