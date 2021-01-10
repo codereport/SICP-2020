@@ -619,8 +619,6 @@
 ;; End of Code from 5.2
 ;;;;;
 
-;; needed?
-
 (define (empty-arglist) '())
 (define (adjoin-arg arg arglist) (append arglist (list arg)))
 (define (last-operand? ops) (null? (cdr ops)))
@@ -628,11 +626,6 @@
 
 (define the-global-environment (setup-environment))
 (define (get-global-environment) the-global-environment)
-
-;(define eceval-operations
-;(list (list 'self-evaluating? self-evaluating?)
-; TODO
-;      ))
 
 (define eceval-operations
   (list (list 'self-evaluating? self-evaluating?)
