@@ -487,3 +487,31 @@
 ![image](https://user-images.githubusercontent.com/36027403/104678656-e7a1a100-56b9-11eb-8f76-30428069eb32.png)
 
 ![image](https://user-images.githubusercontent.com/36027403/104678696-fc7e3480-56b9-11eb-9831-3c51807b4153.png)
+
+```rkt
+;; Exercise 5.38 (page 814/5)
+
+(compile
+ '(+ a 1)
+ 'val
+ 'next)
+ 
+;; resulting code of compilation
+ 
+ ((env)
+ (env proc argl continue val)
+ ((assign proc (op lookup-variable-value) (const +) (reg env))
+  (assign val (const 1))
+  (assign argl (op list) (reg val))
+  (assign val (op lookup-variable-value) (const a) (reg env))
+  (assign argl (op cons) (reg val) (reg argl))
+  (test (op primitive-procedure?) (reg proc))
+  (branch (label primitive-branch1))
+  compiled-branch2
+  (assign continue (label after-call3))
+  (assign val (op compiled-procedure-entry) (reg proc))
+  (goto (reg val))
+  primitive-branch1
+  (assign val (op apply-primitive-procedure) (reg proc) (reg argl))
+  after-call3))
+```
