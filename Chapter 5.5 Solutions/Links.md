@@ -35,6 +35,7 @@
 * [XY PL](http://nsl.com/k/xy/xy.htm)
 * [Lambda Papers](https://en.wikisource.org/wiki/Lambda_Papers)
 * [British APL Webinars](https://britishaplassociation.org/)
+* [Y Combinator](https://www.badykov.com/general/2017/11/12/ycombinator/)
 
 #### Votes for Next Book:
 ```
