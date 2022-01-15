@@ -15,7 +15,7 @@
 * [The Three Projections of Doctor Futamura](http://blog.sigfpe.com/2009/05/three-projections-of-doctor-futamura.html)
 * [Learning about Compilers and Bytecode from Thorsten Ball](https://corecursive.com/037-thorsten-ball-compilers/)
 * [Table of PL Elements #1 :star:](https://twitter.com/code_report/status/1320929215928258560?s=20)
-* [Table of PL Elements #1 :star:](https://craftofcoding.files.wordpress.com/2016/12/languagesptable.png)
+* [Table of PL Elements #2 :star:](https://craftofcoding.files.wordpress.com/2016/12/languagesptable.png)
 * [Alan Kay C++ OOP Quote](https://medium.com/@xcheck/i-invented-the-term-object-oriented-and-c-was-not-what-i-had-in-min-98a48e4f4246#:~:text=1%20min%20read-,%E2%80%9CI%20invented%20the%20term%20'object%20oriented'%2C%20and%20C%2B%2B,and%20first%20OO%20language%20Smalltalk.&text=Millions%20of%20apps%20have%20been,created%2C%20and%20that's%20the%20problem.)
 * [LOGICOMIX](https://www.amazon.com/Logicomix-search-truth-Apostolos-Doxiadis-ebook/dp/B0117S8JSS)
 * [Compressed Sensing](https://en.wikipedia.org/wiki/Compressed_sensing)
